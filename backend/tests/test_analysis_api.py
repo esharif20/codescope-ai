@@ -12,7 +12,6 @@ from app.ingestion import pipeline
 from app.ingestion.github import fail
 from app.ingestion.models import (
     ChangedFile,
-    IngestionError,
     PinnedPullRequest,
     PullRequestRef,
     SnapshotPair,
@@ -35,12 +34,20 @@ async def request(app, method="GET", path="/health", body=b"", headers=None, chu
         messages.append(message)
 
     scope = dict(
-        type="http", asgi={"version": "3.0"}, http_version="1.1", method=method,
-        scheme="http", path=path, raw_path=path.encode(), query_string=b"",
-        root_path="", server=("test", 80), client=("test", 123),
-        headers=headers if headers is not None else [
-            (b"authorization", b"Bearer access"), (b"content-type", b"application/json")
-        ],
+        type="http",
+        asgi={"version": "3.0"},
+        http_version="1.1",
+        method=method,
+        scheme="http",
+        path=path,
+        raw_path=path.encode(),
+        query_string=b"",
+        root_path="",
+        server=("test", 80),
+        client=("test", 123),
+        headers=headers
+        if headers is not None
+        else [(b"authorization", b"Bearer access"), (b"content-type", b"application/json")],
     )
     await app(scope, receive, send)
     start = next(m for m in messages if m["type"] == "http.response.start")
@@ -64,9 +71,14 @@ def api(tmp_path, monkeypatch):
     registry = AnalysisRegistry(settings)
     calls, cleaned = [], []
     metadata = PinnedPullRequest(
-        ref=PullRequestRef(owner="a", repo="b", number=1), title="test",
-        base_repository="a/b", head_repository="a/b", target_base_sha="a" * 40,
-        analysis_base_sha="b" * 40, head_sha="c" * 40, changed_files=1,
+        ref=PullRequestRef(owner="a", repo="b", number=1),
+        title="test",
+        base_repository="a/b",
+        head_repository="a/b",
+        target_base_sha="a" * 40,
+        analysis_base_sha="b" * 40,
+        head_sha="c" * 40,
+        changed_files=1,
     )
 
     def client(*args, **kwargs):
@@ -81,14 +93,17 @@ def api(tmp_path, monkeypatch):
             root.mkdir(exist_ok=True)
             (root / "main.py").write_text(
                 'from fastapi import FastAPI\napp = FastAPI()\n@app.get("/x")\n'
-                'def route():\n    return helper()\ndef helper():\n'
-                f'    return {i}\n'
+                "def route():\n    return helper()\ndef helper():\n"
+                f"    return {i}\n"
             )
         on_stage("sources")
         try:
-            yield SnapshotPair(metadata, *roots, [
-                ChangedFile(old_path="main.py", new_path="main.py", status="modified")
-            ], [])
+            yield SnapshotPair(
+                metadata,
+                *roots,
+                [ChangedFile(old_path="main.py", new_path="main.py", status="modified")],
+                [],
+            )
         finally:
             cleaned.append(True)
 
@@ -100,9 +115,14 @@ def test_health_disabled_and_no_network():
     app = create_app(Settings(), client_factory=lambda *a, **k: pytest.fail("network"))
     assert call(app, headers=[])[0:2] == (200, {"status": "ok"})
     assert call(app, method="POST", path="/api/analyses", body=payload())[0:2] == (
-        503, {"error": {"code": "live_analysis_disabled",
-                        "message": "Live analysis is currently disabled.",
-                        "retry_after_seconds": None}},
+        503,
+        {
+            "error": {
+                "code": "live_analysis_disabled",
+                "message": "Live analysis is currently disabled.",
+                "retry_after_seconds": None,
+            }
+        },
     )
 
 
@@ -113,8 +133,8 @@ def test_success_links_duplicate_and_unknown(api):
     assert status == 201 and data["state"] == "complete"
     assert data["summary"]["affected_routes_base"] == data["summary"]["affected_routes_head"] == 1
     change = data["summary"]["changed_symbols"][0]
-    assert change["old"]["url"] == f'https://github.com/a/b/blob/{"b" * 40}/main.py#L6-L7'
-    assert change["new"]["url"] == f'https://github.com/a/b/blob/{"c" * 40}/main.py#L6-L7'
+    assert change["old"]["url"] == f"https://github.com/a/b/blob/{'b' * 40}/main.py#L6-L7"
+    assert change["new"]["url"] == f"https://github.com/a/b/blob/{'c' * 40}/main.py#L6-L7"
     assert call(app, path=f"/api/analyses/{identity}")[0:2] == (200, data)
     assert call(app, path=f"/api/analyses/{uuid4()}")[0] == 404
     assert call(app, method="POST", path="/api/analyses", body=payload(identity))[0] == 409
@@ -122,8 +142,10 @@ def test_success_links_duplicate_and_unknown(api):
     assert "github-secret" not in json.dumps(data)
 
 
-@pytest.mark.parametrize("authorization", [None, b"Bearer wrong", b"Bearer github-secret",
-                                            b"Basic access", b"Bearer \xff"])
+@pytest.mark.parametrize(
+    "authorization",
+    [None, b"Bearer wrong", b"Bearer github-secret", b"Basic access", b"Bearer \xff"],
+)
 @pytest.mark.parametrize("method", ["POST", "GET"])
 def test_authentication_before_body_or_network(api, authorization, method):
     app, calls, _, _ = api
@@ -134,13 +156,19 @@ def test_authentication_before_body_or_network(api, authorization, method):
     assert calls == [] and "SECRET" not in json.dumps(data)
 
 
-@pytest.mark.parametrize("body,expected", [
-    (b"SECRET", 422), (b"[]", 422), (b"null", 422),
-    (payload(url="https://evil.example/SECRET"), 422),
-    (payload(url="https://github.com/unapproved/repo/pull/1"), 403),
-    (b'{"analysis_id":"SECRET","pr_url":"SECRET"}', 422),
-    (b"{" + b" " * 8192, 413),
-])
+@pytest.mark.parametrize(
+    "body,expected",
+    [
+        (b"SECRET", 422),
+        (b"[]", 422),
+        (b"null", 422),
+        (b"\xffSECRET", 422),
+        (payload(url="https://evil.example/SECRET"), 422),
+        (payload(url="https://github.com/unapproved/repo/pull/1"), 403),
+        (b'{"analysis_id":"SECRET","pr_url":"SECRET"}', 422),
+        (b"{" + b" " * 8192, 413),
+    ],
+)
 def test_invalid_input_no_admission_or_network(api, body, expected):
     app, calls, _, _ = api
     status, data, _ = call(app, method="POST", path="/api/analyses", body=body)
@@ -152,19 +180,35 @@ def test_chunked_cap_and_content_type(api):
     app = api[0]
     assert call(app, method="POST", path="/api/analyses", chunks=[b" " * 4096] * 3)[0] == 413
     for content in (b"text/plain", b"application/jsonp", b"application/json; charset=latin1"):
-        assert call(app, method="POST", path="/api/analyses", body=payload(), headers=[
-            (b"authorization", b"Bearer access"), (b"content-type", content)
-        ])[0] == 415
+        assert (
+            call(
+                app,
+                method="POST",
+                path="/api/analyses",
+                body=payload(),
+                headers=[(b"authorization", b"Bearer access"), (b"content-type", content)],
+            )[0]
+            == 415
+        )
     assert not api[1]
 
 
-@pytest.mark.parametrize("code,expected", [
-    ("github_not_found", 404), ("repository_not_allowed", 403),
-    ("unsupported_repository", 403), ("github_rate_limited", 429),
-    ("github_authentication", 502), ("github_permission_denied", 502),
-    ("github_unavailable", 502), ("github_invalid_response", 502),
-    ("resource_limit", 413), ("pr_changed", 409), ("analysis_timeout", 504),
-])
+@pytest.mark.parametrize(
+    "code,expected",
+    [
+        ("github_not_found", 404),
+        ("repository_not_allowed", 403),
+        ("unsupported_repository", 403),
+        ("github_rate_limited", 429),
+        ("github_authentication", 502),
+        ("github_permission_denied", 502),
+        ("github_unavailable", 502),
+        ("github_invalid_response", 502),
+        ("resource_limit", 413),
+        ("pr_changed", 409),
+        ("analysis_timeout", 504),
+    ],
+)
 def test_terminal_http_mapping_and_polling(api, monkeypatch, code, expected):
     def fail_mapping(*args, **kwargs):
         error = fail(code)
@@ -174,7 +218,9 @@ def test_terminal_http_mapping_and_polling(api, monkeypatch, code, expected):
 
     monkeypatch.setattr(pipeline, "map_snapshot_changes", fail_mapping)
     identity = uuid4()
-    status, data, headers = call(api[0], method="POST", path="/api/analyses", body=payload(identity))
+    status, data, headers = call(
+        api[0], method="POST", path="/api/analyses", body=payload(identity)
+    )
     assert status == expected and data["error"]["code"] == code
     assert data["state"] == ("timeout" if code == "analysis_timeout" else "error")
     assert call(api[0], path=f"/api/analyses/{identity}")[0:2] == (200, data)
