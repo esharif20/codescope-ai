@@ -90,7 +90,7 @@ a negative fixture proves no false positives
 **Plans**: 4 plans (3 waves)
 
 Plans:
-- [ ] 03-01-PLAN.md — Wave 1: Route/impact contracts and Tree-sitter route syntax extraction
+- [x] 03-01-PLAN.md — Wave 1: Route/impact contracts and Tree-sitter route syntax extraction
 - [ ] 03-02-PLAN.md — Wave 2: Verified FastAPI receivers, imported routers and literal mount prefixes
 - [ ] 03-03-PLAN.md — Wave 2: Deterministic bounded reverse-impact paths with source evidence
 - [ ] 03-04-PLAN.md — Wave 3: Public project API, exact positive/negative fixture tests and scope documentation

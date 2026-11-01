@@ -26,7 +26,7 @@ Must-priority stories from ARCHITECTURE.md. Each maps to exactly one roadmap pha
 
 ### Route Impact
 
-- [ ] **US-04**: User can see potentially affected FastAPI routes and the paths connecting them to a change
+- [x] **US-04**: User can see potentially affected FastAPI routes and the paths connecting them to a change
 
 ### Evidence & Navigation
 
@@ -76,7 +76,7 @@ Explicitly excluded by ARCHITECTURE.md's MVP scope.
 |-------------|-------|--------|
 | US-02 | Phase 1 | Complete |
 | US-03 | Phase 2 | Complete |
-| US-04 | Phase 3 | Pending |
+| US-04 | Phase 3 | Complete |
 | US-01 | Phase 4 | Pending |
 | US-09 | Phase 4 | Pending |
 | US-12 | Phase 4 | Pending |
