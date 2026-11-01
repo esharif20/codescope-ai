@@ -15,12 +15,12 @@ runtime behaviour or finds every dependency.
 
 ### Validated
 
-(None yet — ship to validate)
+- ✓ US-02: Identify added, modified and removed functions with file and line references — Phase 1
+  (`backend/app/analysis/`: Tree-sitter extractor, Pydantic contract, JSON CLI, 46 pytest cases)
 
 ### Active
 
 - [ ] US-01: Submit a supported GitHub PR URL and see analysis status or a clear error
-- [ ] US-02: Identify added, modified and removed functions with file and line references
 - [ ] US-03: Trace supported caller relationships and flag unresolved edges
 - [ ] US-04: See potentially affected FastAPI routes and the paths connecting them
 - [ ] US-05: Read a concise AI impact explanation grounded in source evidence
@@ -84,7 +84,10 @@ runtime behaviour or finds every dependency.
 | Adopt GSD for phase/stage tracking, mirrored by TASKS.md + GitHub Issues | User requested a durable one-step-at-a-time tracker; GSD's `gates.confirm_*` defaults give that for free | ✓ Good — in place |
 | Disable `workflow.research` project-wide | ARCHITECTURE.md already fixes stack/scope; re-researching it would contradict AGENTS.md rule 8 (approval required to change fixed decisions) | ✓ Good |
 | Approve local GSD commits on `feat/stage-1-python-symbols`; nothing pushed | Unblocks GSD's atomic per-task commit model while honouring "no pushes without approval" | ✓ Good |
-| Phase 1 = Tree-sitter Python symbol extractor, `backend/app/analysis/`, tolerant syntax-error handling, CPython `__qualname__`-style qualified names | Already designed and approved in detail before GSD was introduced; US-02 blocks every downstream Must story | — Pending (implementation in progress) |
+| Phase 1 = Tree-sitter Python symbol extractor, `backend/app/analysis/`, tolerant syntax-error handling, CPython `__qualname__`-style qualified names | Already designed and approved in detail before GSD was introduced; US-02 blocks every downstream Must story | ✓ Good — shipped, 46/46 tests green |
+| Built via 3 parallel subagents (backlog / extractor / tests) from one pinned contract, implementation and tests never seeing each other's code | Isolates bulky `gh`/test-matrix tool output from the main session's context; independent test authorship catches spec-vs-code gaps a single author could paper over | ✓ Good — one weak assertion tightened on reconciliation, zero real contract conflicts |
+| `tree-sitter` pinned to `<0.26` (resolves to 0.25.2) | 0.26.0 has a reference-counting bug in its Node binding that segfaults on deeply nested trees (reproduced and isolated via bisection); 0.25.2 is clean through 150+ levels | ✓ Good — re-test before raising this ceiling |
+| Dependencies added incrementally per phase (`uv add` on first need, not front-loaded); `requirements.txt`/`requirements-dev.txt` regenerated from `uv.lock`; backend README updated at each milestone | Explicit process rule from the user, applied from Phase 1 onward | ✓ Good — standing practice for Phase 2+ |
 | Backend hosting stays Cloud Run, not Vercel | Settled architecture decision; cross-cloud credentials to Firestore/GCS would need long-lived keys Cloud Run avoids; hosting is Phase 8, not now | ✓ Good |
 | Frontend static host left open per ARCHITECTURE.md; Vercel is a candidate to resolve that open question at Phase 7 | ARCHITECTURE.md explicitly leaves this undecided ("Firebase Hosting or another free static host") — Vercel fits that gap, with an approved doc amendment when reached | — Pending |
 
@@ -106,4 +109,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-11-01 after initialization*
+*Last updated: 2026-11-01 after Phase 1 completion*
