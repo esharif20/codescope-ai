@@ -112,10 +112,10 @@ and `/health` expose status/progress/error states
 **Plans**: 5 plans (4 waves)
 
 Plans:
-- [ ] 04-01-PLAN.md — Wave 1: Ingestion/status contracts, strict PR URLs and bounded live settings
-- [ ] 04-02-PLAN.md — Wave 2: Public GitHub REST metadata and safe immutable source snapshots
-- [ ] 04-03-PLAN.md — Wave 2: Added/modified/removed symbol mapping and SHA-pinned source links
-- [ ] 04-04-PLAN.md — Wave 3: Observable bounded request runtime and independent base/head impacts
+- [x] 04-01-PLAN.md — Wave 1: Ingestion/status contracts, strict PR URLs and bounded live settings
+- [x] 04-02-PLAN.md — Wave 2: Public GitHub REST metadata and safe immutable source snapshots
+- [x] 04-03-PLAN.md — Wave 2: Added/modified/removed symbol mapping and SHA-pinned source links
+- [x] 04-04-PLAN.md — Wave 3: Observable bounded request runtime and independent base/head impacts
 - [ ] 04-05-PLAN.md — Wave 4: Dependency approval gate, FastAPI health/analyses endpoints and usage contract
 
 ### Phase 5: Report JSON & evaluation
@@ -188,7 +188,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | 1. Python symbol extraction | Pre-GSD | Complete | 2026-11-01 |
 | 2. Imports, resolution, call graph | 9/9 | Complete | 2026-11-01 |
 | 3. FastAPI routes & impact paths | 4/4 | Complete | 2026-11-01 |
-| 4. PR ingestion & diff mapping | 0/TBD | Not started | - |
+| 4. PR ingestion & diff mapping | 4/5 | In progress — dependency approval pending | - |
 | 5. Report JSON & evaluation | 0/TBD | Not started | - |
 | 6. RAG & Gemini summary | 0/TBD | Not started | - |
 | 7. Frontend | 0/TBD | Not started | - |

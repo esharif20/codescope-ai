@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: planned
-stopped_at: Phase 04 planned and independently checked; ready for execution
-last_updated: "2026-11-01T16:22:36.936Z"
-last_activity: 2026-11-01
+status: awaiting_decision
+stopped_at: Plans 04-01 through 04-04 complete; 04-05 Task 1 awaits FastAPI dependency approval
+last_updated: "2026-11-01T16:37:38.297Z"
+last_activity: 2026-11-01 -- Phase 04 execution started
 progress:
   total_phases: 8
   completed_phases: 3
   total_plans: 18
-  completed_plans: 13
-  percent: 72
+  completed_plans: 17
+  percent: 94
 ---
 
 # Project State
@@ -22,14 +22,14 @@ See: .planning/PROJECT.md (updated 2026-11-01)
 
 **Core value:** Show what a PR might affect, why, and the exact code supporting each finding — never claim static
 analysis proves runtime behaviour or finds every dependency.
-**Current focus:** Phase 04 — PR ingestion & diff mapping (planned)
+**Current focus:** Phase 04 — pr-ingestion-diff-mapping
 
 ## Current Position
 
-Phase: 4
-Plan: 0 of 5
-Status: Phase 4 planned — five plans passed independent checking
-Last activity: 2026-11-01
+Phase: 04 (pr-ingestion-diff-mapping) — EXECUTING
+Plan: 5 of 5 (04-01 through 04-04 complete)
+Status: Awaiting 04-05 dependency decision before API implementation
+Last activity: 2026-11-01 -- Phase 04 execution started
 
 Phase 3 delivered static route registration, bounded canonical reverse-impact paths and the public
 `analyze_route_impacts` library API. All 246 backend tests and Ruff pass; independent verification passed
@@ -38,7 +38,15 @@ The fixture remains conservatively partial because generic constructor assignmen
 Phase 3 is pushed through `4cbde74`; Backend CI passed all 246 tests and Ruff:
 https://github.com/esharif20/codescope-ai/actions/runs/41326179064
 
-Progress: 3/8 phases complete; 13/18 currently planned GSD plans complete (Phase 1 predates GSD plans).
+Progress: 3/8 phases complete; 17/18 currently planned GSD plans complete (Phase 1 predates GSD plans).
+
+Phase 4 Plans 01-04 delivered validated PR admission, complete immutable snapshots, both-revision symbol
+mapping/source links, and an exclusive observable pipeline with cooperative deadlines and cleanup. Latest
+backend verification: 515 tests passed; Ruff and diff checks passed. No repository source was executed;
+GitHub tests use fakes. Phase 4 changes are local, with no new dependency installed yet.
+
+Checkpoint: 04-05 Task 1 requires explicit approval for core FastAPI and required transitives, with no
+standard/server/test-client extras. Dependency manifests and lockfile remain unchanged pending approval.
 
 Phase 4 has five plans across four waves. Plans 04-02 (snapshots) and 04-03 (mapping) can run in parallel.
 Proposed defaults: merge-base/head comparison retaining target base separately, synchronous UUID-addressed
@@ -129,6 +137,6 @@ The fixture returns partial=True because ordinary constructor assignments also t
 ## Session Continuity
 
 Last session: 2026-11-01T16:12:21.775Z
-Stopped at: Phase 4 planned; five plans passed independent checking with no issues.
-Next: execute Phase 4 — 04-01, then 04-02/04-03 in parallel, then 04-04 and 04-05.
+Stopped at: Plans 04-01 through 04-04 complete; 04-05 Task 1 awaits dependency approval.
+Next: on approval, resume 04-05 Task 1, install the approved dependencies, implement/test the API, then verify Phase 4.
 Resume file: None
