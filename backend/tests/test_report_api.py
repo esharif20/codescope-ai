@@ -2,6 +2,7 @@
 
 import asyncio
 import json
+from contextlib import contextmanager
 from threading import Event
 from uuid import uuid4
 
@@ -108,7 +109,6 @@ def test_terminal_report_eviction_and_ttl(api, expired):
 def test_concurrent_report_remains_not_ready_through_cleanup(api, monkeypatch):
     entered, proceed = Event(), Event()
     original = pipeline.fetch_snapshots
-    from contextlib import contextmanager
 
     @contextmanager
     def paused_cleanup(*args, **kwargs):
@@ -135,6 +135,33 @@ def test_concurrent_report_remains_not_ready_through_cleanup(api, monkeypatch):
         assert api[2] == [True]
 
     asyncio.run(scenario())
+
+
+@pytest.mark.parametrize("failure", ["timeout", "cleanup"])
+def test_pipeline_failure_never_exposes_report(api, monkeypatch, failure):
+    if failure == "timeout":
+
+        def fail_mapping(*args, **kwargs):
+            raise IngestionError("analysis_timeout", "Analysis timed out.", 504)
+
+        monkeypatch.setattr(pipeline, "map_snapshot_changes", fail_mapping)
+    else:
+        original = pipeline.fetch_snapshots
+
+        @contextmanager
+        def failed_cleanup(*args, **kwargs):
+            with original(*args, **kwargs) as pair:
+                yield pair
+            raise RuntimeError("SECRET cleanup path")
+
+        monkeypatch.setattr(pipeline, "fetch_snapshots", failed_cleanup)
+    identity = uuid4()
+    result = call(api[0], method="POST", path="/api/analyses", body=payload(identity))
+    assert result[0] == (504 if failure == "timeout" else 502)
+    status, data, _ = call(api[0], path=report_path(identity))
+    assert status == 409 and data["error"]["code"] == "report_unavailable"
+    assert identity not in api[3]._reports and api[2] == [True]
+    assert "SECRET" not in json.dumps(result[1])
 
 
 @pytest.mark.parametrize("enabled", [False, True])
