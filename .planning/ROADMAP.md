@@ -71,7 +71,7 @@ Plans:
 - [x] 02-06-PLAN.md — Wave 4: Class hierarchy index + call resolver (CS-022, call half)
 - [x] 02-07-PLAN.md — Wave 5: NetworkX call graph builder + query API (CS-023)
 - [x] 02-08-PLAN.md — Wave 6: Multi-file orchestrator (build_project_graph) + codescope-graph CLI
-- [ ] 02-09-PLAN.md — Wave 7: Fixture integration tests verifying exact resolved/unresolved edges
+- [x] 02-09-PLAN.md — Wave 7: Fixture integration tests verifying exact resolved/unresolved edges
 
 ### Phase 3: FastAPI routes & impact paths
 **Goal**: Detect FastAPI route declarations and trace reverse-dependency paths from changed symbols to routes;
