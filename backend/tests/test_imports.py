@@ -65,3 +65,100 @@ def test_import_aliased() -> None:
             file_path="mod.py",
         )
     ]
+
+
+def test_from_import_plain() -> None:
+    result = extract_raw_imports("from app.services import auth", "mod.py")
+
+    assert result == [
+        RawImport(
+            kind="from_import",
+            module="app.services",
+            relative_level=0,
+            names=[("auth", None)],
+            is_star=False,
+            line=1,
+            file_path="mod.py",
+        )
+    ]
+
+
+def test_from_import_aliased() -> None:
+    result = extract_raw_imports("from app.services import auth as a", "mod.py")
+
+    assert result == [
+        RawImport(
+            kind="from_import",
+            module="app.services",
+            relative_level=0,
+            names=[("auth", "a")],
+            is_star=False,
+            line=1,
+            file_path="mod.py",
+        )
+    ]
+
+
+def test_relative_level_one_no_trailing_module() -> None:
+    result = extract_raw_imports("from . import auth", "mod.py")
+
+    assert result == [
+        RawImport(
+            kind="from_import",
+            module="",
+            relative_level=1,
+            names=[("auth", None)],
+            is_star=False,
+            line=1,
+            file_path="mod.py",
+        )
+    ]
+
+
+def test_relative_level_two_with_trailing_module() -> None:
+    result = extract_raw_imports("from ..services.base import BaseService", "mod.py")
+
+    assert result == [
+        RawImport(
+            kind="from_import",
+            module="services.base",
+            relative_level=2,
+            names=[("BaseService", None)],
+            is_star=False,
+            line=1,
+            file_path="mod.py",
+        )
+    ]
+
+
+def test_star_import_absolute() -> None:
+    result = extract_raw_imports("from app.services import *", "mod.py")
+
+    assert result == [
+        RawImport(
+            kind="from_import",
+            module="app.services",
+            relative_level=0,
+            names=[("*", None)],
+            is_star=True,
+            line=1,
+            file_path="mod.py",
+        )
+    ]
+
+
+def test_star_import_relative() -> None:
+    """Exact statement used in fixtures/sample_fastapi_repo/routes/__init__.py."""
+    result = extract_raw_imports("from ..services import *", "mod.py")
+
+    assert result == [
+        RawImport(
+            kind="from_import",
+            module="services",
+            relative_level=2,
+            names=[("*", None)],
+            is_star=True,
+            line=1,
+            file_path="mod.py",
+        )
+    ]
