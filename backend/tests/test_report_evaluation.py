@@ -17,9 +17,16 @@ LABELS = Path(__file__).resolve().parents[2] / "fixtures/report_evaluation/label
 def test_exact_sets_and_undefined_metrics():
     score = score_sets({("A",), ("B",)}, {("A",), ("C",)})
     assert score == {
-        "tp": [["A"]], "fp": [["C"]], "fn": [["B"]],
-        "tp_count": 1, "fp_count": 1, "fn_count": 1,
-        "expected_count": 2, "predicted_count": 2, "precision": 0.5, "recall": 0.5,
+        "tp": [["A"]],
+        "fp": [["C"]],
+        "fn": [["B"]],
+        "tp_count": 1,
+        "fp_count": 1,
+        "fn_count": 1,
+        "expected_count": 2,
+        "predicted_count": 2,
+        "precision": 0.5,
+        "recall": 0.5,
     }
     assert score_sets(set(), set())["precision"] is None
     assert score_sets(set(), set())["recall"] is None
@@ -40,9 +47,7 @@ def test_known_misses_and_negative_cases_stay_visible(suite):
         for revision in case["revisions"]:
             assert revision["unresolved_count"] > 0
     audit = cases["unsupported-audit"]["revisions"][0]
-    assert audit["endpoints"]["fn"] == [
-        ["main:app", "routes.users:get_user", "GET", "/users/me"]
-    ]
+    assert audit["endpoints"]["fn"] == [["main:app", "routes.users:get_user", "GET", "/users/me"]]
     assert ["routes.users:get_user", "services.auth:AuthService.login"] in audit["edges"]["fn"]
     assert cases["auth-positive"]["revisions"][0]["endpoints"]["tp_count"] == 2
     for name in ("unrelated-callers", "unresolved-negative"):
@@ -68,7 +73,9 @@ def test_aggregation_recomputes_counts_and_defined_denominators(suite):
             assert macro[name] == sum(values) / len(values)
 
 
-@pytest.mark.parametrize("mutation", ["duplicate", "traversal", "absolute", "unknown_root", "extra", "duplicate_source"])
+@pytest.mark.parametrize(
+    "mutation", ["duplicate", "traversal", "absolute", "unknown_root", "extra", "duplicate_source"]
+)
 def test_invalid_labels_rejected(tmp_path, mutation):
     data = json.loads(LABELS.read_text())
     case = data["cases"][0]
@@ -96,8 +103,32 @@ def test_source_guard_controlled_provenance_and_inventory():
     report = build_case_report(case)
     assert report.provenance.kind == "controlled"
     assert report.provenance.base_digest == report.provenance.head_digest
-    assert {n.source.file_path for r in report.revisions for n in r.nodes} == {"cycle_unresolved.py"}
-    assert all(u.source.file_path == "cycle_unresolved.py" for u in report.uncertainties if u.source)
+    assert {n.source.file_path for r in report.revisions for n in r.nodes} == {
+        "cycle_unresolved.py"
+    }
+    assert all(
+        u.source.file_path == "cycle_unresolved.py" for u in report.uncertainties if u.source
+    )
+
+
+def test_multiple_seeds_and_repeated_calls_do_not_multiply_identities():
+    case = json.loads(LABELS.read_text())["cases"][0]
+    seed = copy.deepcopy(case["seed_changes"][0])
+    seed["symbol_id"] = "routes.users:get_user"
+    seed["old"] = seed["new"] = {"file_path": "routes/users.py", "start_line": 12, "end_line": 16}
+    case["changed_symbols"].append(seed["symbol_id"])
+    case["seed_changes"].append(seed)
+    report = build_case_report(case)
+    for revision in report.revisions:
+        edges = {(edge.caller, edge.callee) for edge in revision.edges}
+        assert len(edges) == len(revision.edges)
+        assert ("callers:call_twice", "services.auth:get_current_user") in edges
+        endpoints = {
+            (f.route.app_id, f.route.handler_id, f.route.method, f.route.path)
+            for f in revision.findings
+        }
+        assert len(revision.findings) == 3
+        assert len(endpoints) == 2
 
 
 def test_symlink_sources_rejected(tmp_path, monkeypatch):

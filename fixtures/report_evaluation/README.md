@@ -33,4 +33,33 @@ state their defined denominators. Empty negative cases remain visible.
 
 These small controlled fixtures measure structural correctness only. They do not
 establish completeness, runtime behaviour, performance, or improvement over another
-method. Measured results will be recorded after the first evaluation run.
+method.
+
+## Measured fixture results
+
+First measured with `python -m app.reporting.evaluation --labels
+../fixtures/report_evaluation/labels.json` from `backend/`. Both revisions have
+identical results because their source snapshots are identical:
+
+| Case | Edge TP / FP / FN | Endpoint TP / FP / FN | Unresolved calls |
+| --- | --- | --- | --- |
+| auth-positive | 10 / 0 / 2 | 2 / 0 / 0 | 7 |
+| unsupported-audit | 10 / 0 / 2 | 0 / 0 / 1 | 7 |
+| unrelated-callers | 10 / 0 / 2 | 0 / 0 / 0 | 7 |
+| cycle-positive | 3 / 0 / 0 | 1 / 0 / 0 | 1 |
+| unresolved-negative | 3 / 0 / 0 | 0 / 0 / 0 | 1 |
+
+Pooled across five cases and two separately scored revisions, edge micro precision
+is 1.0 and recall is 72/84 = 0.8571428571428571 (12 FN). Endpoint micro precision is
+1.0 and recall is 6/8 = 0.75 (2 FN). Edge macro precision/recall are 1.0/0.9
+(10 defined values each); endpoint macro precision is 1.0 (4 defined), recall is
+2/3 (6 defined). Empty endpoint cases have null precision and recall; the missed
+audit endpoint has null precision and zero recall. These repeated source cases
+are not independent samples of real changes.
+
+Both missing edges are the source-bound `login` receivers described above. The
+audit path's missing route edge causes its endpoint FN. All expected unresolved
+locations are retained as uncertainties. Four unknown relationship sites in the
+sample and one callback site in the cycle fixture remain outside truth target
+denominators, listed explicitly in each case. Sample reports retain partial
+route-analysis diagnostics; no truncation is observed on these fixtures.
