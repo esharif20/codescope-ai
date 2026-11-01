@@ -23,7 +23,9 @@ def test_frozen_reports_and_catalog():
         assert report.report_id == entry["id"]
         for revision in report.revisions:
             paths = {finding.route.path for finding in revision.findings}
-            assert paths == ({"/users/me", "/users/{user_id}"} if entry["id"] == "auth-positive" else set())
+            assert paths == (
+                {"/users/me", "/users/{user_id}"} if entry["id"] == "auth-positive" else set()
+            )
         if entry["id"] == "unrelated-negative":
             assert report.provenance.fixture_id == "unrelated-callers"
             assert report.changes[0].symbol_id == "callers:call_twice"
