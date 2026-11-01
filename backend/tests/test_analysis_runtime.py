@@ -1,10 +1,15 @@
 from concurrent.futures import ThreadPoolExecutor
+from threading import Event
 from uuid import uuid4
 
 import pytest
 
 from app.ingestion.models import (
-    AnalysisRequest, AnalysisSummary, IngestionError, PinnedPullRequest, PullRequestRef,
+    AnalysisRequest,
+    AnalysisSummary,
+    IngestionError,
+    PinnedPullRequest,
+    PullRequestRef,
 )
 from app.ingestion.runtime import AnalysisRegistry, Deadline
 from app.ingestion.settings import Limits, Settings
@@ -15,11 +20,18 @@ from app.reporting.models import AnalysisReport, GitHubProvenance, RevisionRepor
 def report_for(item):
     return AnalysisReport(
         report_id=str(item.analysis_id),
-        provenance=GitHubProvenance(pull_request=PinnedPullRequest(
-            ref=PullRequestRef(owner="a", repo="b", number=1), title="test",
-            base_repository="a/b", head_repository="a/b", target_base_sha="a" * 40,
-            analysis_base_sha="b" * 40, head_sha="c" * 40, changed_files=0,
-        )),
+        provenance=GitHubProvenance(
+            pull_request=PinnedPullRequest(
+                ref=PullRequestRef(owner="a", repo="b", number=1),
+                title="test",
+                base_repository="a/b",
+                head_repository="a/b",
+                target_base_sha="a" * 40,
+                analysis_base_sha="b" * 40,
+                head_sha="c" * 40,
+                changed_files=0,
+            )
+        ),
         revisions=[RevisionReport(revision="base"), RevisionReport(revision="head")],
     )
 
@@ -145,10 +157,15 @@ def test_invalid_report_never_publishes_and_can_fail(fault):
         # A summary with a missing change cannot be published with the report.
         from app.ingestion.models import ChangedSymbol
         from app.ingestion.source_links import source_reference
-        summary.changed_symbols = [ChangedSymbol(
-            status="added", symbol_id="x:f", kind="function",
-            new=source_reference(report.provenance.pull_request, "head", "x.py", 1, 1),
-        )]
+
+        summary.changed_symbols = [
+            ChangedSymbol(
+                status="added",
+                symbol_id="x:f",
+                kind="function",
+                new=source_reference(report.provenance.pull_request, "head", "x.py", 1, 1),
+            )
+        ]
     elif fault == "routes":
         summary.affected_routes_base = 1
     else:
@@ -211,6 +228,7 @@ def test_reports_expire_and_evict_with_status_active_owner_protected():
 @pytest.mark.parametrize("value", [0, -1, 2097153, True, 1.5])
 def test_report_limit_is_strict_positive_lower_only(value):
     from pydantic import ValidationError
+
     with pytest.raises(ValidationError):
         Limits(max_report_bytes=value)
 
@@ -220,3 +238,40 @@ def test_report_limit_env_override():
     assert Settings.from_env({"CODESCOPE_MAX_REPORT_BYTES": "100"}).limits.max_report_bytes == 100
     with pytest.raises(ValueError):
         Settings.from_env({"CODESCOPE_MAX_REPORT_BYTES": "2097153"})
+
+
+def test_readers_cannot_observe_half_published_completion(monkeypatch):
+    from app.ingestion import runtime
+
+    registry = AnalysisRegistry(Settings())
+    item = request()
+    report = prepare(registry, item)
+    entered, proceed, reading = Event(), Event(), Event()
+    original = runtime.canonical_json_bytes
+
+    def pause(value):
+        if isinstance(value, AnalysisReport):
+            entered.set()
+            assert proceed.wait(5)
+        return original(value)
+
+    def read():
+        reading.set()
+        return registry.get(item.analysis_id), registry.get_report(item.analysis_id)
+
+    monkeypatch.setattr(runtime, "canonical_json_bytes", pause)
+    with ThreadPoolExecutor(2) as pool:
+        publication = pool.submit(
+            registry.complete, item.analysis_id, AnalysisSummary(), report=report
+        )
+        try:
+            assert entered.wait(5)
+            snapshot = pool.submit(read)
+            assert reading.wait(5)
+            assert not snapshot.done()
+        finally:
+            proceed.set()
+        publication.result(timeout=5)
+        status, retained = snapshot.result(timeout=5)
+    assert status.state == "complete"
+    assert retained == report

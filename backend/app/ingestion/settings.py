@@ -23,6 +23,7 @@ class Limits(BaseModel):
     max_source_file_bytes: int = Field(default=128 * 1024, gt=0, le=128 * 1024, strict=True)
     max_total_source_bytes: int = Field(default=8 * 1024**2, gt=0, le=8 * 1024**2, strict=True)
     max_summary_bytes: int = Field(default=2 * 1024**2, gt=0, le=2 * 1024**2, strict=True)
+    max_report_bytes: int = Field(default=2 * 1024**2, gt=0, le=2 * 1024**2, strict=True)
     max_terminal_records: int = Field(default=20, gt=0, le=20, strict=True)
     terminal_ttl_seconds: float = Field(default=3600, gt=0, le=3600, allow_inf_nan=False)
     max_active_analyses: int = Field(default=1, gt=0, le=1, strict=True)
