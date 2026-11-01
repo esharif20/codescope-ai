@@ -14,27 +14,46 @@ def test_allowed_url_is_canonical(suffix):
     assert (ref.owner, ref.repo, ref.number) == ("owner", "repo", 12)
 
 
-@pytest.mark.parametrize("url", [
-    "http://github.com/o/r/pull/1", "https://www.github.com/o/r/pull/1",
-    "https://api.github.com/o/r/pull/1", "https://github.com.evil/o/r/pull/1",
-    "https://user@github.com/o/r/pull/1", "https://github.com:443/o/r/pull/1",
-    "https://github.com/o/r/pull/0", "https://github.com/o/r/pull/-1",
-    "https://github.com/o/r/pull/1?x=y", "https://github.com/o/r/pull/1?",
-    "https://github.com/o/r/pull/1#x", "https://github.com/o/r/pull/1#",
-    "https://github.com/o/r/pull/1/files", "https://github.com/o/r/pull/1//",
-    "https://github.com/o/r%2fp/pull/1", "https://github.com/o/%72/pull/1",
-    "https://github.com/o/../r/pull/1", "https://github.com/o/./pull/1",
-    "https://github.com/o//r/pull/1", "https://github.com/o\\r/pull/1",
-    "https://github.com/-o/r/pull/1", "https://github.com/o-/r/pull/1",
-    "https://github.com/o--p/r/pull/1", "https://github.com/ö/r/pull/1",
-    "https://github.com/o/./pull/1", "https://github.com/o/../pull/1",
-    "https://github.com/o/r/pull/１", "https://github.com/o/r/pull/+1",
-    " https://github.com/o/r/pull/1", "https://github.com/o/r/pull/1\n",
-    "https://github.com/o/\tr/pull/1", "https://github.com/o/r/pull/1\x00",
-    "https://github.com/" + "o" * 40 + "/r/pull/1",
-    "https://github.com/o/" + "r" * 101 + "/pull/1",
-    "https://github.com/o/r/pull/" + "1" * 2050,
-])
+@pytest.mark.parametrize(
+    "url",
+    [
+        "http://github.com/o/r/pull/1",
+        "https://www.github.com/o/r/pull/1",
+        "https://api.github.com/o/r/pull/1",
+        "https://github.com.evil/o/r/pull/1",
+        "https://user@github.com/o/r/pull/1",
+        "https://github.com:443/o/r/pull/1",
+        "https://github.com/o/r/pull/0",
+        "https://github.com/o/r/pull/-1",
+        "https://github.com/o/r/pull/1?x=y",
+        "https://github.com/o/r/pull/1?",
+        "https://github.com/o/r/pull/1#x",
+        "https://github.com/o/r/pull/1#",
+        "https://github.com/o/r/pull/1/files",
+        "https://github.com/o/r/pull/1//",
+        "https://github.com/o/r%2fp/pull/1",
+        "https://github.com/o/%72/pull/1",
+        "https://github.com/o/../r/pull/1",
+        "https://github.com/o/./pull/1",
+        "https://github.com/o//r/pull/1",
+        "https://github.com/o\\r/pull/1",
+        "https://github.com/-o/r/pull/1",
+        "https://github.com/o-/r/pull/1",
+        "https://github.com/o--p/r/pull/1",
+        "https://github.com/ö/r/pull/1",
+        "https://github.com/o/./pull/1",
+        "https://github.com/o/../pull/1",
+        "https://github.com/o/r/pull/１",
+        "https://github.com/o/r/pull/+1",
+        " https://github.com/o/r/pull/1",
+        "https://github.com/o/r/pull/1\n",
+        "https://github.com/o/\tr/pull/1",
+        "https://github.com/o/r/pull/1\x00",
+        "https://github.com/" + "o" * 40 + "/r/pull/1",
+        "https://github.com/o/" + "r" * 101 + "/pull/1",
+        "https://github.com/o/r/pull/" + "1" * 2050,
+    ],
+)
 def test_reject_url_matrix(url):
     with pytest.raises(IngestionError) as caught:
         parse_pr_url(url, {"o/r"})
@@ -49,10 +68,16 @@ def test_allowlist_exact_membership():
         assert caught.value.code == "repository_not_allowed"
 
 
-@pytest.mark.parametrize("environment", [{}, {"GITHUB_TOKEN": "upstream"},
-    {"CODESCOPE_ALLOWED_REPOSITORIES": "o/r"},
-    {"CODESCOPE_LIVE_ACCESS_TOKEN": "caller"},
-    {"CODESCOPE_ALLOWED_REPOSITORIES": "o/r", "CODESCOPE_LIVE_ACCESS_TOKEN": "   "}])
+@pytest.mark.parametrize(
+    "environment",
+    [
+        {},
+        {"GITHUB_TOKEN": "upstream"},
+        {"CODESCOPE_ALLOWED_REPOSITORIES": "o/r"},
+        {"CODESCOPE_LIVE_ACCESS_TOKEN": "caller"},
+        {"CODESCOPE_ALLOWED_REPOSITORIES": "o/r", "CODESCOPE_LIVE_ACCESS_TOKEN": "   "},
+    ],
+)
 def test_missing_access_configuration_disables_live(environment):
     settings = Settings.from_env(environment)
     assert not settings.live_enabled
@@ -62,8 +87,13 @@ def test_missing_access_configuration_disables_live(environment):
 
 
 def test_distinct_credentials_and_secret_representations():
-    settings = Settings.from_env({"CODESCOPE_ALLOWED_REPOSITORIES": "Owner/Repo,other/repo",
-        "CODESCOPE_LIVE_ACCESS_TOKEN": "caller-secret", "GITHUB_TOKEN": "upstream-secret"})
+    settings = Settings.from_env(
+        {
+            "CODESCOPE_ALLOWED_REPOSITORIES": "Owner/Repo,other/repo",
+            "CODESCOPE_LIVE_ACCESS_TOKEN": "caller-secret",
+            "GITHUB_TOKEN": "upstream-secret",
+        }
+    )
     assert settings.live_enabled
     settings.require_live_enabled()
     assert settings.allowed_repositories == frozenset({"owner/repo", "other/repo"})
@@ -76,8 +106,9 @@ def test_distinct_credentials_and_secret_representations():
 @pytest.mark.parametrize("allowlist", ["https://github.com/o/r", "o/*", "o/r,", "../r", "o/r/x"])
 def test_invalid_config_fails_closed(allowlist):
     with pytest.raises(ValueError):
-        Settings.from_env({"CODESCOPE_ALLOWED_REPOSITORIES": allowlist,
-                           "CODESCOPE_LIVE_ACCESS_TOKEN": "caller"})
+        Settings.from_env(
+            {"CODESCOPE_ALLOWED_REPOSITORIES": allowlist, "CODESCOPE_LIVE_ACCESS_TOKEN": "caller"}
+        )
 
 
 def test_limits_immutable_and_environment_only_lowers():
@@ -102,8 +133,9 @@ def test_limits_immutable_and_environment_only_lowers():
         for invalid in (0, value + 1):
             with pytest.raises(ValueError):
                 Settings.from_env({"CODESCOPE_" + field.upper(): str(invalid)})
-    lower = Settings.from_env({"CODESCOPE_MAX_HTTP_REQUESTS": "50",
-                              "CODESCOPE_ANALYSIS_TIMEOUT_SECONDS": "5"})
+    lower = Settings.from_env(
+        {"CODESCOPE_MAX_HTTP_REQUESTS": "50", "CODESCOPE_ANALYSIS_TIMEOUT_SECONDS": "5"}
+    )
     assert lower.limits.max_http_requests == 50
     assert lower.limits.analysis_timeout_seconds == 5
     with pytest.raises(ValidationError):
