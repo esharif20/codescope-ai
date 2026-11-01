@@ -52,3 +52,24 @@ def build_call_graph(
         unresolved.setdefault(call.enclosing_symbol, []).append(call)
 
     return CallGraph(graph=graph, unresolved=unresolved)
+
+
+def callers_of(call_graph: CallGraph, symbol_id: str) -> list[str]:
+    """Return direct callers sorted alphabetically, or none for an unknown node."""
+    if symbol_id not in call_graph.graph:
+        return []
+    return sorted(call_graph.graph.predecessors(symbol_id))
+
+
+def callees_of(call_graph: CallGraph, symbol_id: str) -> list[str]:
+    """Return direct callees sorted alphabetically, or none for an unknown node."""
+    if symbol_id not in call_graph.graph:
+        return []
+    return sorted(call_graph.graph.successors(symbol_id))
+
+
+def reverse_reachable_from(call_graph: CallGraph, symbol_id: str) -> list[str]:
+    """Return every symbol that can reach ``symbol_id``, sorted alphabetically."""
+    if symbol_id not in call_graph.graph:
+        return []
+    return sorted(nx.ancestors(call_graph.graph, symbol_id))
