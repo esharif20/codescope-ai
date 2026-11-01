@@ -129,8 +129,9 @@ slot early; the pipeline releases admission after work and snapshot cleanup fini
 
 Configure live access through environment variables before creating the application:
 
-- `CODESCOPE_ALLOWED_REPOSITORIES`: comma-separated `owner/repo` allowlist, including both
-  repositories for an allowed fork PR. An empty allowlist disables live access.
+- `CODESCOPE_ALLOWED_REPOSITORIES`: comma-separated base `owner/repo` allowlist. A fork head
+  must be the public repository identified by that PR's metadata; it needs no separate allowlist
+  entry. An empty allowlist disables live access.
 - `CODESCOPE_LIVE_ACCESS_TOKEN`: caller bearer secret. Missing/blank disables live access.
 - `GITHUB_TOKEN`: optional upstream GitHub credential, distinct from the caller secret. The API
   does not accept this token as caller authorization; never share it with API callers.
