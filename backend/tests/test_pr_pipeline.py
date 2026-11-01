@@ -268,7 +268,7 @@ def test_added_and_renamed_identity_seeds_head_only(setup_pipeline):
     ]
     assert result.summary.affected_routes_base == result.summary.affected_routes_head == 1
     report = setup_pipeline[1].get_report(result.analysis_id)
-    assert [(c.symbol_id, c.status) for c in report.changes] == [
+    assert sorted((c.symbol_id, c.status) for c in report.changes) == [
         (c.symbol_id, c.status) for c in result.summary.changed_symbols
     ]
 
@@ -371,3 +371,43 @@ def test_renamed_file_retains_distinct_pinned_paths(setup_pipeline, monkeypatch)
     report = setup_pipeline[1].get_report(result.analysis_id)
     assert {c.old.source.file_path for c in report.changes if c.old} == {"main.py"}
     assert {c.new.source.file_path for c in report.changes if c.new} == {"renamed.py"}
+
+
+def test_publication_validation_failure_after_cleanup_keeps_report_private(
+    setup_pipeline, monkeypatch
+):
+    original = pipeline.build_report
+
+    def inconsistent(*args, **kwargs):
+        report = original(*args, **kwargs)
+        report.report_id = str(uuid4())
+        return report
+
+    monkeypatch.setattr(pipeline, "build_report", inconsistent)
+    result = run(setup_pipeline)
+    assert result.state == "error"
+    assert result.error.code == "report_evidence_invalid"
+    assert setup_pipeline[-1] == [True]
+    assert_report_unavailable(setup_pipeline)
+
+
+def test_assembly_timeout_is_cooperative_and_cleans_sources(setup_pipeline, monkeypatch):
+    original = pipeline.build_report
+
+    def expire(*args, **kwargs):
+        checks = []
+
+        def timeout():
+            checks.append(True)
+            assert all(root.exists() for root in setup_pipeline[3])
+            if len(checks) == 4:
+                raise IngestionError("analysis_timeout", "Analysis timed out.", 504)
+
+        kwargs["check_budget"] = timeout
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(pipeline, "build_report", expire)
+    result = run(setup_pipeline)
+    assert result.state == "timeout"
+    assert setup_pipeline[-1] == [True]
+    assert_report_unavailable(setup_pipeline)

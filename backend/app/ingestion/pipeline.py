@@ -22,6 +22,8 @@ from app.ingestion.runtime import AnalysisRegistry, Deadline
 from app.ingestion.settings import Settings
 from app.ingestion.snapshots import fetch_snapshots
 from app.ingestion.urls import parse_pr_url
+from app.reporting.builder import build_report
+from app.reporting.models import GitHubProvenance, GitHubReference, ReportChange, ReportInput
 
 
 def _diagnostics(analysis, root, revision):
@@ -58,11 +60,11 @@ def _diagnostics(analysis, root, revision):
     return result
 
 
-def _route_count(analysis):
+def _route_count(revision):
     return len(
         {
             (p.route.app_id, p.route.handler_id, p.route.method, p.route.path)
-            for p in analysis.impact.impacts
+            for p in revision.findings
         }
     )
 
@@ -109,6 +111,32 @@ def run_analysis(
                 check_budget=deadline.check,
             )
             deadline.check()
+            report = build_report(
+                ReportInput(
+                    report_id=str(analysis_id),
+                    provenance=GitHubProvenance(pull_request=pair.metadata),
+                    changes=[
+                        ReportChange(
+                            status=change.status,
+                            symbol_id=change.symbol_id,
+                            kind=change.kind,
+                            old=GitHubReference(source=change.old) if change.old else None,
+                            new=GitHubReference(source=change.new) if change.new else None,
+                        )
+                        for change in mapping.changes
+                    ],
+                    unmapped_changes=[
+                        GitHubReference(source=ref) for ref in mapping.unmapped_changes
+                    ],
+                    mapping_diagnostics=mapping.diagnostics,
+                    mapping_partial=mapping.partial,
+                ),
+                base=base,
+                head=head,
+                roots={"base": pair.base_root, "head": pair.head_root},
+                max_report_bytes=settings.limits.max_report_bytes,
+                check_budget=deadline.check,
+            )
             diagnostics = set(mapping.diagnostics)
             diagnostics.update(_diagnostics(base, pair.base_root, "base"))
             diagnostics.update(_diagnostics(head, pair.head_root, "head"))
@@ -117,14 +145,14 @@ def run_analysis(
                 ordered = ordered[:999] + ["diagnostics_truncated"]
             summary = AnalysisSummary(
                 changed_symbols=mapping.changes,
-                affected_routes_base=_route_count(base),
-                affected_routes_head=_route_count(head),
-                partial=mapping.partial or base.partial or head.partial or len(diagnostics) > 1000,
+                affected_routes_base=_route_count(report.revisions[0]),
+                affected_routes_head=_route_count(report.revisions[1]),
+                partial=report.partial or len(diagnostics) > 1000,
                 diagnostics=ordered,
             )
         # Cleanup must succeed before a success is observable.
         deadline.check()
-        registry.complete(analysis_id, summary)
+        registry.complete(analysis_id, summary, report=report)
     except IngestionError as error:
         registry.fail(analysis_id, error)
     except Exception:
