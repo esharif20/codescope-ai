@@ -22,7 +22,7 @@ Must-priority stories from ARCHITECTURE.md. Each maps to exactly one roadmap pha
 ### Symbol & Dependency Analysis
 
 - [ ] **US-02**: User can identify added, modified and removed functions with file and line references
-- [ ] **US-03**: User can trace supported caller relationships and see unresolved edges flagged explicitly
+- [x] **US-03**: User can trace supported caller relationships and see unresolved edges flagged explicitly
 
 ### Route Impact
 
