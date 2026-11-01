@@ -14,10 +14,13 @@ Phase: 1 of 8 complete (Python symbol extraction) — Phase 2 not yet started
 Plan: Phase 1 implemented directly (by design — see Decisions below), not via `/gsd:plan-phase`/`/gsd:execute-phase`
 Status: Phase 1 done and verified; ready to plan Phase 2
 Last activity: 2026-11-01 — Phase 1 implemented (`backend/app/analysis/`: Pydantic models, tree-sitter walk, JSON
-CLI), 46/46 pytest green, ruff clean, isolation guard passing. CS-010–CS-016 closed (GitHub issues #1-7). Two real
-findings fixed during verification: a tree-sitter 0.26.0 Node reference-counting bug that segfaults on deep trees
-(pinned `tree-sitter<0.26`), and a local uv/CPython macOS `.pth` interaction breaking the installed console
-script (worked around for tests via `pythonpath = ["."]`; documented, not reproduced on Linux CI).
+CLI), 46/46 pytest green, ruff clean, isolation guard passing, console script (`codescope-parse`) working
+end-to-end. CS-010–CS-016 closed (GitHub issues #1-7), no open caveats. Two real findings fixed during
+verification: a tree-sitter 0.26.0 Node reference-counting bug that segfaults on deep trees (pinned
+`tree-sitter<0.26`), and a `uv<0.13` bug writing hidden editable-install `.pth` files that CPython 3.13 silently
+skips — confirmed the fix, upgraded global `uv` to 0.13.6 (approved), rebuilt the venv, and pinned `[tool.uv]
+required-version = ">=0.13"` so it can't silently reproduce. CI (`.github/workflows/backend-ci.yml`) pins the
+same fixed `setup-uv` version.
 
 Progress: [█░░░░░░░░░] 1/8 phases (12.5%)
 
