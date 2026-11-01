@@ -123,6 +123,42 @@ def test_wrong_reference_side_rejected():
         ChangedSymbol(status="added", symbol_id="a:f", kind="function", new=reference())
 
 
+@pytest.mark.parametrize(
+    "status,old,new",
+    [
+        (status, old, new)
+        for status in ("added", "removed", "modified", "renamed")
+        for old in (None, "old.py")
+        for new in (None, "new.py")
+    ],
+)
+def test_changed_file_sides(status, old, new):
+    valid = (
+        (status == "added" and old is None and new is not None)
+        or (status == "removed" and old is not None and new is None)
+        or (status in ("modified", "renamed") and old is not None and new is not None)
+    )
+    if valid:
+        assert ChangedFile(status=status, old_path=old, new_path=new).status == status
+    else:
+        with pytest.raises(ValidationError):
+            ChangedFile(status=status, old_path=old, new_path=new)
+
+
+def test_changed_file_absent_side_has_no_blob():
+    with pytest.raises(ValidationError):
+        ChangedFile(status="added", new_path="new.py", old_blob_sha="a" * 40)
+    with pytest.raises(ValidationError):
+        ChangedFile(status="removed", old_path="old.py", new_blob_sha="a" * 40)
+
+
+@pytest.mark.parametrize("repository", ["owner", "owner/repo/extra", "../repo", "owner/.."])
+def test_pinned_repository_provenance_validation(repository):
+    for field in ("base_repository", "head_repository"):
+        with pytest.raises(ValidationError):
+            metadata(**{field: repository})
+
+
 @pytest.mark.parametrize("state", ["pending", "running", "complete", "error", "timeout"])
 @pytest.mark.parametrize(
     "has_summary,has_error", [(False, False), (True, False), (False, True), (True, True)]
