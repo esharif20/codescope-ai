@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: ready
-stopped_at: Phase 03 complete and verified; Phase 04 ready for planning
+status: planned
+stopped_at: Phase 04 planned and independently checked; ready for execution
 last_updated: "2026-11-01T16:22:36.936Z"
 last_activity: 2026-11-01
 progress:
   total_phases: 8
   completed_phases: 3
-  total_plans: 13
+  total_plans: 18
   completed_plans: 13
-  percent: 100
+  percent: 72
 ---
 
 # Project State
@@ -22,22 +22,28 @@ See: .planning/PROJECT.md (updated 2026-11-01)
 
 **Core value:** Show what a PR might affect, why, and the exact code supporting each finding — never claim static
 analysis proves runtime behaviour or finds every dependency.
-**Current focus:** Phase 04 — PR ingestion & diff mapping (planning pending)
+**Current focus:** Phase 04 — PR ingestion & diff mapping (planned)
 
 ## Current Position
 
 Phase: 4
-Plan: Not started
-Status: Phase 3 verified complete — Phase 4 ready to plan
+Plan: 0 of 5
+Status: Phase 4 planned — five plans passed independent checking
 Last activity: 2026-11-01
 
 Phase 3 delivered static route registration, bounded canonical reverse-impact paths and the public
 `analyze_route_impacts` library API. All 246 backend tests and Ruff pass; independent verification passed
 12/12 must-haves. Exact positive fixture reaches two routes; both unrelated changes reach none.
 The fixture remains conservatively partial because generic constructor assignments also carry diagnostics.
-Phase 3 commits are local; the last remote CI success covers Phase 2 at `300a4c7`.
+Phase 3 is pushed through `4cbde74`; Backend CI passed all 246 tests and Ruff:
+https://github.com/esharif20/codescope-ai/actions/runs/41326179064
 
-Progress: 3/8 phases complete; 13/13 currently planned GSD plans complete (Phase 1 predates GSD plans).
+Progress: 3/8 phases complete; 13/18 currently planned GSD plans complete (Phase 1 predates GSD plans).
+
+Phase 4 has five plans across four waves. Plans 04-02 (snapshots) and 04-03 (mapping) can run in parallel.
+Proposed defaults: merge-base/head comparison retaining target base separately, synchronous UUID-addressed
+polling and cooperative timeout with bounded in-memory status retention. Plan 04-05 begins with explicit
+approval for core FastAPI and required transitives before dependency changes; no dependencies were added while planning.
 
 ## Performance Metrics
 
@@ -123,6 +129,6 @@ The fixture returns partial=True because ordinary constructor assignments also t
 ## Session Continuity
 
 Last session: 2026-11-01T16:12:21.775Z
-Stopped at: Phase 3 complete, all four plans and independent verification passed.
-Next: plan Phase 4 — PR ingestion & diff mapping.
+Stopped at: Phase 4 planned; five plans passed independent checking with no issues.
+Next: execute Phase 4 — 04-01, then 04-02/04-03 in parallel, then 04-04 and 04-05.
 Resume file: None

@@ -109,7 +109,14 @@ and `/health` expose status/progress/error states
      timeout), and `GET /health` confirms basic service availability
   5. Every returned source reference is pinned to the exact analysed commit SHA, never a mutable branch
      reference
-**Plans**: TBD
+**Plans**: 5 plans (4 waves)
+
+Plans:
+- [ ] 04-01-PLAN.md — Wave 1: Ingestion/status contracts, strict PR URLs and bounded live settings
+- [ ] 04-02-PLAN.md — Wave 2: Public GitHub REST metadata and safe immutable source snapshots
+- [ ] 04-03-PLAN.md — Wave 2: Added/modified/removed symbol mapping and SHA-pinned source links
+- [ ] 04-04-PLAN.md — Wave 3: Observable bounded request runtime and independent base/head impacts
+- [ ] 04-05-PLAN.md — Wave 4: Dependency approval gate, FastAPI health/analyses endpoints and usage contract
 
 ### Phase 5: Report JSON & evaluation
 **Goal**: Structured report JSON (findings, uncertainties, source links) built before Gemini is added; evaluated
