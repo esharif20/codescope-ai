@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# Node
+node_modules/
+dist/
+.vite/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Local vector storage
+chroma_db/
+.chroma/
+
+# Generated files
+*.log
+.DS_Store
+.coverage
+htmlcov/
+
+# Credentials
+*.pem
+*service-account*.json
