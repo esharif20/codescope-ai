@@ -141,7 +141,10 @@ def test_callers_of_returns_all_callers_sorted() -> None:
 
     call_graph = build_call_graph(
         symbols_by_module,
-        [ResolvedCall(caller=caller, callee=target, line=index) for index, caller in enumerate(callers)],
+        [
+            ResolvedCall(caller=caller, callee=target, line=index)
+            for index, caller in enumerate(callers)
+        ],
         [],
     )
 
