@@ -23,6 +23,7 @@ dev = [
 
 [project.scripts]
 codescope-parse = "app.analysis.cli:main"
+codescope-graph = "app.analysis.cli:graph_main"
 
 [build-system]
 requires = ["hatchling"]
