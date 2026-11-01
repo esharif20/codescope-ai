@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: awaiting_decision
-stopped_at: Plans 04-01 through 04-04 complete; 04-05 Task 1 awaits FastAPI dependency approval
+stopped_at: All five Phase 04 plans complete; verification acceptance awaiting user approval
 last_updated: "2026-11-01T16:37:38.297Z"
 last_activity: 2026-11-01 -- Phase 04 execution started
 progress:
   total_phases: 8
   completed_phases: 3
   total_plans: 18
-  completed_plans: 17
-  percent: 94
+  completed_plans: 18
+  percent: 100
 ---
 
 # Project State
@@ -27,8 +27,8 @@ analysis proves runtime behaviour or finds every dependency.
 ## Current Position
 
 Phase: 04 (pr-ingestion-diff-mapping) — EXECUTING
-Plan: 5 of 5 (04-01 through 04-04 complete)
-Status: Awaiting 04-05 dependency decision before API implementation
+Plan: 5 of 5 complete
+Status: Verification acceptance awaiting approval — 18/18 must-haves verified
 Last activity: 2026-11-01 -- Phase 04 execution started
 
 Phase 3 delivered static route registration, bounded canonical reverse-impact paths and the public
@@ -38,15 +38,21 @@ The fixture remains conservatively partial because generic constructor assignmen
 Phase 3 is pushed through `4cbde74`; Backend CI passed all 246 tests and Ruff:
 https://github.com/esharif20/codescope-ai/actions/runs/41326179064
 
-Progress: 3/8 phases complete; 17/18 currently planned GSD plans complete (Phase 1 predates GSD plans).
+Progress: 3/8 phases accepted complete; 18/18 currently planned GSD plans complete (Phase 1 predates GSD plans).
 
-Phase 4 Plans 01-04 delivered validated PR admission, complete immutable snapshots, both-revision symbol
-mapping/source links, and an exclusive observable pipeline with cooperative deadlines and cleanup. Latest
-backend verification: 515 tests passed; Ruff and diff checks passed. No repository source was executed;
-GitHub tests use fakes. Phase 4 changes are local, with no new dependency installed yet.
+All five Phase 4 plans delivered validated PR admission, complete immutable snapshots, both-revision symbol
+mapping/source links, an exclusive observable pipeline, and the FastAPI health/analyses API. Latest backend
+verification: 554 tests passed; Ruff, lock and diff checks passed. Independent verification confirms 18/18
+must-haves. Real GitHub PR 1440 completed through the actual ASGI API (201, 53 requests, 18.2 seconds), with
+concurrent progress/health, matching final GET and a pinned source URL returning 200. No repository source
+was executed. Status is process-local, deadlines cooperative, and unsupported analysis remains partial.
+Phase 4 changes are local. Core FastAPI and required transitives were explicitly approved and installed.
 
-Checkpoint: 04-05 Task 1 requires explicit approval for core FastAPI and required transitives, with no
-standard/server/test-client extras. Dependency manifests and lockfile remain unchanged pending approval.
+The verifier status is human_needed solely for browser source navigation/highlighting. The manual item
+is persisted in 04-HUMAN-UAT.md; a multiple-choice approval to finish with it pending has been requested.
+
+Checkpoint resolved: user explicitly approved adding FastAPI and finishing Phase 4. Approval covers core
+FastAPI and required transitives, with no standard/server/test-client extras.
 
 Phase 4 has five plans across four waves. Plans 04-02 (snapshots) and 04-03 (mapping) can run in parallel.
 Proposed defaults: merge-base/head comparison retaining target base separately, synchronous UUID-addressed
@@ -137,6 +143,6 @@ The fixture returns partial=True because ordinary constructor assignments also t
 ## Session Continuity
 
 Last session: 2026-11-01T16:12:21.775Z
-Stopped at: Plans 04-01 through 04-04 complete; 04-05 Task 1 awaits dependency approval.
-Next: on approval, resume 04-05 Task 1, install the approved dependencies, implement/test the API, then verify Phase 4.
+Stopped at: All five Phase 4 plans and automated/live verification complete; final acceptance requested.
+Next: on approval, mark Phase 4 complete, update requirements/project/TASKS and GitHub epic #10; retain manual source-opening UAT pending.
 Resume file: None
