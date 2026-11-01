@@ -22,7 +22,7 @@ tested.
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [ ] **Phase 1: Python symbol extraction** - Tree-sitter extractor returns structured symbol data, independent of FastAPI
-- [ ] **Phase 2: Imports, resolution, call graph** - Resolve imports/direct calls into a NetworkX call graph with explicit unresolved edges
+- [x] **Phase 2: Imports, resolution, call graph** - Resolve imports/direct calls into a NetworkX call graph with explicit unresolved edges (completed 2026-11-01)
 - [ ] **Phase 3: FastAPI routes & impact paths** - Detect FastAPI routes and trace reverse-dependency paths from changes to routes
 - [ ] **Phase 4: PR ingestion & diff mapping** - Fetch real PRs at pinned SHAs, map diffs to symbols, expose status/progress via the API
 - [ ] **Phase 5: Report JSON & evaluation** - Build structured report JSON and evaluate it against hand-labelled fixtures, before Gemini
