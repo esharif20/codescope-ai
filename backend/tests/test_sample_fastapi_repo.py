@@ -24,6 +24,18 @@ EXPECTED_RESOLVED_EDGES: set[tuple[str, str, tuple[int, ...]]] = {
     ("tests.test_services:test_login_succeeds", "services.auth:AuthService", (7,)),
 }
 
+# ``getattr`` is a bare call in the fixture's dynamic dispatcher. Like the
+# subsequent ``handler(...)`` call, it has no statically verifiable target.
+EXPECTED_UNRESOLVED: set[tuple[str, str, int]] = {
+    ("services.base:BaseService.audit", "print", 6),
+    ("routes.users:get_user", "auth.login", 15),
+    ("callers:dispatch", "getattr", 24),
+    ("callers:dispatch", "handler", 25),
+    ("callers:run_task", "callback", 29),
+    ("callers:process", "handler.process_item", 33),
+    ("tests.test_services:test_login_succeeds", "svc.login", 8),
+}
+
 
 @pytest.fixture(scope="module")
 def project_graph() -> ProjectGraph:
@@ -53,3 +65,28 @@ def test_fixture_resolves_inherited_method_through_public_query(
     assert callers_of(project_graph.call_graph, "services.base:BaseService.audit") == [
         "services.auth:AuthService.login"
     ]
+
+
+def test_fixture_contains_exact_unresolved_call_evidence(project_graph: ProjectGraph) -> None:
+    actual_unresolved = {
+        (entry.enclosing_symbol, entry.expression, entry.line)
+        for entries in project_graph.call_graph.unresolved.values()
+        for entry in entries
+    }
+
+    assert actual_unresolved == EXPECTED_UNRESOLVED
+
+
+def test_fixture_unresolved_evidence_is_not_uncertain(project_graph: ProjectGraph) -> None:
+    assert all(
+        entry.status.value == "unresolved"
+        for entries in project_graph.call_graph.unresolved.values()
+        for entry in entries
+    )
+
+
+def test_fixture_files_are_all_readable_and_parsed(project_graph: ProjectGraph) -> None:
+    assert len(project_graph.file_statuses) == 10
+    assert all(
+        status in {"ok", "empty"} for status in project_graph.file_statuses.values()
+    )
