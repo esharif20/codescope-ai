@@ -10,6 +10,7 @@ from starlette.responses import JSONResponse
 from app.ingestion.models import AnalysisError, AnalysisRequest, IngestionError
 from app.ingestion.pipeline import run_analysis
 from app.ingestion.urls import parse_pr_url
+from app.reporting.demos import get_demo_report, list_demos
 
 
 def http_status(code):
@@ -27,9 +28,15 @@ def http_status(code):
         "unsupported_private_repository",
     }:
         return 403
-    if code in {"analysis_not_found", "github_not_found"}:
+    if code in {"analysis_not_found", "github_not_found", "demo_not_found"}:
         return 404
-    if code in {"analysis_busy", "analysis_id_conflict", "pr_changed"}:
+    if code in {
+        "analysis_busy",
+        "analysis_id_conflict",
+        "pr_changed",
+        "report_not_ready",
+        "report_unavailable",
+    }:
         return 409
     if code in {
         "resource_limit",
@@ -44,6 +51,7 @@ def http_status(code):
         "unsupported_media_type": 415,
         "github_rate_limited": 429,
         "live_analysis_disabled": 503,
+        "demo_unavailable": 503,
         "analysis_timeout": 504,
     }.get(code, 502)
 
@@ -144,6 +152,18 @@ def create_router(settings, registry, client_factory):
     @router.get("/api/analyses/{analysis_id}")
     def status(analysis_id: UUID):
         return registry.get(analysis_id)
+
+    @router.get("/api/analyses/{analysis_id}/report")
+    def report(analysis_id: UUID):
+        return registry.get_report(analysis_id)
+
+    @router.get("/api/demos")
+    def demo_catalog():
+        return {"schema_version": "1", "demos": list_demos()}
+
+    @router.get("/api/demos/{demo_id}/report")
+    def demo_report(demo_id: str):
+        return get_demo_report(demo_id)
 
     return router
 

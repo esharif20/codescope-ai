@@ -43,7 +43,7 @@ def test_retained_live_report_after_cleanup(api, tmp_path):
         finding = revision["findings"][0]
         assert finding["symbols"] == ["main:route", "main:helper"]
         assert finding["edges"][0]["evidence"][0]["source"]["url"] == (
-            f"https://github.com/a/b/blob/{sha * 40}/main.py#L5-L5"
+            f"https://github.com/a/b/blob/{sha * 40}/main.py#L5"
         )
     assert isinstance(data["uncertainties"], list) and isinstance(data["partial"], bool)
     assert calls == [True] and "github-secret" not in json.dumps(data)
@@ -53,7 +53,11 @@ def test_retained_live_report_after_cleanup(api, tmp_path):
 @pytest.mark.parametrize("identity", ["not-a-uuid-SECRET", str(uuid4()), "auth-positive"])
 @pytest.mark.parametrize("enabled", [False, True])
 def test_live_boundary_precedes_report_validation(identity, enabled):
-    settings = Settings(allowed_repositories={"a/b"}, live_access_token="access") if enabled else Settings()
+    settings = (
+        Settings(allowed_repositories={"a/b"}, live_access_token="access")
+        if enabled
+        else Settings()
+    )
     app = create_app(settings)
     status, data, _ = call(app, path=report_path(identity), headers=[])
     assert status == (401 if enabled else 503)
@@ -85,7 +89,8 @@ def test_pending_running_failed_and_unknown_reports(api):
 def test_terminal_report_eviction_and_ttl(api, expired):
     now = [0.0]
     settings = Settings(
-        allowed_repositories={"a/b"}, live_access_token="access",
+        allowed_repositories={"a/b"},
+        live_access_token="access",
         limits=Limits(max_terminal_records=1, terminal_ttl_seconds=2),
     )
     registry = AnalysisRegistry(settings, clock=lambda: now[0])
@@ -137,7 +142,11 @@ def test_public_frozen_demos_never_compute_or_reserve(monkeypatch, enabled):
     def forbidden(*args, **kwargs):
         pytest.fail("public demo attempted analysis, admission or network")
 
-    settings = Settings(allowed_repositories={"a/b"}, live_access_token="access") if enabled else Settings()
+    settings = (
+        Settings(allowed_repositories={"a/b"}, live_access_token="access")
+        if enabled
+        else Settings()
+    )
     registry = AnalysisRegistry(settings)
     app = create_app(settings, registry, forbidden)
     monkeypatch.setattr(registry, "reserve", forbidden)
@@ -146,19 +155,32 @@ def test_public_frozen_demos_never_compute_or_reserve(monkeypatch, enabled):
     monkeypatch.setattr(demos, "_regenerated_bytes", forbidden)
     expected = demos.list_demos()
     assert call(app, path="/api/demos", headers=[])[0:2] == (
-        200, {"schema_version": "1", "demos": expected}
+        200,
+        {"schema_version": "1", "demos": expected},
     )
     for entry in expected:
         path = f"/api/demos/{entry['id']}/report"
         assert call(app, path=path, headers=[])[0:2] == (
-            200, demos.get_demo_report(entry["id"]).model_dump(mode="json")
+            200,
+            demos.get_demo_report(entry["id"]).model_dump(mode="json"),
         )
         assert call(app, method="POST", path=path, headers=[])[0] == 405
     assert call(app, method="POST", path="/api/demos", headers=[])[0] == 405
     assert not registry._records and registry._active is None
 
 
-@pytest.mark.parametrize("identity", ["unknown", str(uuid4()), "catalog.json", "..", "%2e%2e", "../../api/analyses/live", "auth-positive.json"])
+@pytest.mark.parametrize(
+    "identity",
+    [
+        "unknown",
+        str(uuid4()),
+        "catalog.json",
+        "..",
+        "%2e%2e",
+        "../../api/analyses/live",
+        "auth-positive.json",
+    ],
+)
 def test_public_unknown_and_traversal_ids_never_read_artifacts(monkeypatch, identity):
     def forbidden(*args, **kwargs):
         pytest.fail("unrecognized ID attempted file access")
