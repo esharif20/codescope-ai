@@ -42,6 +42,7 @@ def test_receiver_explicit_constructor(imports, constructor):
         "app = fake()",
         "def FastAPI(): pass\napp = FastAPI()",
         "from fastapi import *\napp = FastAPI()",
+        "from fastapi import FastAPI\nfrom other import *\napp = FastAPI()",
         "from fastapi import FastAPI\nFastAPI = fake\napp = FastAPI()",
         "from fastapi import FastAPI\napp = FastAPI()\napp = fake",
         "from fastapi import FastAPI\nfrom elsewhere import FastAPI\napp = FastAPI()",
@@ -287,3 +288,15 @@ def test_receiver_module_alias_router_and_invalid_prefix():
     )
     assert bad.registrations == []
     assert any(d.reason == "receiver_prefix_unsupported" for d in bad.diagnostics)
+
+
+def test_include_star_import_keeps_explicit_alias_ambiguous():
+    result = inventory(
+        {
+            "main": "from fastapi import FastAPI\nfrom routes import router\n"
+            "from elsewhere import *\napp = FastAPI()\napp.include_router(router)\n",
+            "routes": ROUTES,
+        }
+    )
+    assert result.registrations == []
+    assert any(d.reason == "include_import_ambiguous" for d in result.diagnostics)

@@ -42,6 +42,9 @@ def _imports(syntax: RouteSyntax) -> dict[str, list[tuple[RawImport, str]]]:
 
 
 def _constructor(expression: str, syntax: RouteSyntax) -> str | None:
+    # A star import can replace any explicitly named binding; its exports are unknown.
+    if any(raw.is_star for raw in syntax.eligible_imports):
+        return None
     parts = expression.split(".")
     bindings = _imports(syntax).get(parts[0], [])
     if len(bindings) != 1 or syntax.binding_counts.get(parts[0]) != 1:
@@ -65,6 +68,8 @@ def _include_target(
     if "." not in expression and syntax.binding_counts.get(expression) == 1:
         if any(raw.name == expression for raw in syntax.receivers):
             return f"{module}:{expression}", ""
+    if any(raw.is_star for raw in syntax.eligible_imports):
+        return None, "include_import_ambiguous"
     root = expression.split(".")[0]
     bindings = _imports(syntax).get(root, [])
     if syntax.binding_counts.get(root, 0) > 1 or len(bindings) > 1:
