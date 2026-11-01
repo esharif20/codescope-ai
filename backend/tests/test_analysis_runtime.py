@@ -26,11 +26,13 @@ def test_deadline_exact_boundary():
 def test_admission_race_duplicate_and_defensive_snapshot():
     registry = AnalysisRegistry(Settings())
     item = request()
+
     def attempt(_):
         try:
             return registry.reserve(item).analysis_id
         except IngestionError as error:
             return error.code
+
     with ThreadPoolExecutor(2) as pool:
         results = list(pool.map(attempt, range(2)))
     assert results.count(item.analysis_id) == 1
@@ -45,8 +47,9 @@ def test_admission_race_duplicate_and_defensive_snapshot():
 
 def test_terminal_invariants_and_expiry_hold_slot_until_cleanup():
     now = [0.0]
-    registry = AnalysisRegistry(Settings(limits=Limits(terminal_ttl_seconds=2)),
-                                clock=lambda: now[0])
+    registry = AnalysisRegistry(
+        Settings(limits=Limits(terminal_ttl_seconds=2)), clock=lambda: now[0]
+    )
     item = request()
     registry.reserve(item)
     registry.update(item.analysis_id, "mapping")
@@ -66,8 +69,9 @@ def test_terminal_invariants_and_expiry_hold_slot_until_cleanup():
 
 
 def test_retention_and_output_limit():
-    registry = AnalysisRegistry(Settings(limits=Limits(max_terminal_records=1,
-                                                     max_summary_bytes=200)))
+    registry = AnalysisRegistry(
+        Settings(limits=Limits(max_terminal_records=1, max_summary_bytes=200))
+    )
     first, second = request(), request()
     registry.reserve(first)
     registry.complete(first.analysis_id, AnalysisSummary())
