@@ -6,7 +6,7 @@ pydantic==2.14.2
     # via codescope-backend
 pydantic-core==2.50.2
     # via pydantic
-tree-sitter==0.26.0
+tree-sitter==0.25.2
     # via codescope-backend
 tree-sitter-python==0.25.0
     # via codescope-backend

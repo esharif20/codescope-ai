@@ -1,0 +1,1 @@
+"""CodeScope AI backend package."""
