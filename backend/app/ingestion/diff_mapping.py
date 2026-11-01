@@ -25,9 +25,13 @@ def _read(root: Path, path: str | None) -> bytes:
     try:
         target = root / path
         target.resolve().relative_to(root.resolve())
-        # Reject symlinks even when they point within the snapshot.
-        if any(part.is_symlink() for part in (target, *target.parents)):
-            raise ValueError("snapshot symlink")
+        # Only repository-controlled components are untrusted. The trusted root
+        # may legitimately live beneath an OS symlink (macOS /var, for example).
+        component = root
+        for name in Path(path).parts:
+            component = component / name
+            if component.is_symlink():
+                raise ValueError("snapshot symlink")
         return target.read_bytes()
     except (OSError, ValueError) as exc:
         raise IngestionError(

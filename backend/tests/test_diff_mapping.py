@@ -209,6 +209,36 @@ def test_snapshot_symlink_rejected(tmp_path):
     assert error.value.code == "snapshot_read_failed"
 
 
+def test_trusted_root_beneath_symlinked_ancestor(tmp_path):
+    actual_parent = tmp_path / "actual"
+    actual_parent.mkdir()
+    snapshot = pair(actual_parent, b"def f(): return 1\n", b"def f(): return 2\n")
+    alias = tmp_path / "alias"
+    alias.symlink_to(actual_parent, target_is_directory=True)
+    snapshot.base_root = alias / "base"
+    snapshot.head_root = alias / "head"
+    result = map_snapshot_changes(snapshot)
+    assert identities(result) == [("m:f", "modified")]
+    assert not result.partial
+
+
+@pytest.mark.parametrize("escape", [False, True])
+def test_repository_directory_symlink_rejected(tmp_path, escape):
+    snapshot = pair(
+        tmp_path,
+        b"def f(): return 1\n",
+        b"def f(): return 2\n",
+        old_path="pkg/m.py",
+        new_path="pkg/m.py",
+    )
+    real = tmp_path / "outside" if escape else snapshot.base_root / "real"
+    (snapshot.base_root / "pkg").rename(real)
+    (snapshot.base_root / "pkg").symlink_to(real, target_is_directory=True)
+    with pytest.raises(IngestionError) as error:
+        map_snapshot_changes(snapshot)
+    assert error.value.code == "snapshot_read_failed"
+
+
 def test_cross_file_module_identity_collision(tmp_path):
     snapshot = pair(tmp_path, None, b"def f(): pass\n", new_path="pkg.py")
     directory = snapshot.head_root / "pkg"

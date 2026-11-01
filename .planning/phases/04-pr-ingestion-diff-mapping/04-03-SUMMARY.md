@@ -58,7 +58,7 @@ completed: 2026-11-01
 - `backend/app/ingestion/source_links.py` — Validated pinned source-reference construction.
 - `backend/app/ingestion/diff_mapping.py` — Pure local snapshot diff, ownership, identity classification and resource limits.
 - `backend/tests/test_source_links.py` — 16 exact provenance, encoding and invalid-input cases.
-- `backend/tests/test_diff_mapping.py` — 31 classification, ownership, malformed input, ordering, collision, byte-boundary and limit cases.
+- `backend/tests/test_diff_mapping.py` — 34 classification, ownership, malformed input, ordering, collision, byte-boundary and limit cases.
 
 ## Decisions Made
 
@@ -69,14 +69,16 @@ No new dependencies or architecture changes were needed. Source bytes are parsed
 ## Verification
 
 - Task 1 TDD RED failed on the expected missing source-link module; Task 2 TDD RED failed on the expected missing diff-mapping module.
-- `cd backend && uv run --no-sync python -m pytest tests/test_diff_mapping.py tests/test_source_links.py -q` — **47 passed**.
+- `cd backend && uv run --no-sync python -m pytest tests/test_diff_mapping.py tests/test_source_links.py -q` — **50 passed**, including trusted-root and internal-symlink regressions.
 - `cd backend && uv run --no-sync ruff check app/ingestion/diff_mapping.py app/ingestion/source_links.py tests/test_diff_mapping.py tests/test_source_links.py` — **passed**.
 - `git diff --check` — **passed**.
 - Owned implementation/tests scanned for TODO/FIXME/placeholder patterns — none found.
 
 ## Deviations from Plan
 
-None in implementation scope. The parent orchestrator owns shared STATE, ROADMAP and REQUIREMENTS updates; this executor leaves those files untouched to avoid parallel edits.
+**[Rule 1 - Bug] Restrict symlink checks to repository-controlled components.** A live probe showed that checking all filesystem ancestors rejected legitimate macOS temporary roots beneath the OS `/var` symlink. The mapper now preserves resolved containment checks and checks every component below its trusted root for symlinks. A hermetic symlinked-ancestor regression failed before the fix and passed afterward; internal file symlinks and internal directory symlinks targeting both inside and outside the root still fail closed. Changes are limited to `diff_mapping.py` and its tests.
+
+The parent orchestrator owns shared STATE, ROADMAP and REQUIREMENTS updates; this executor leaves those files untouched to avoid parallel edits.
 
 ## Issues Encountered
 
