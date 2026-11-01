@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -34,6 +35,8 @@ class ProjectGraph:
 
 def _build_symbols_and_bindings(
     root: str,
+    *,
+    check_budget: Callable[[], None] = lambda: None,
 ) -> tuple[
     dict[str, list[Symbol]],
     dict[str, list[ImportBinding]],
@@ -41,6 +44,7 @@ def _build_symbols_and_bindings(
     dict[str, bytes],
 ]:
     """Collect symbols and resolve imports project-wide before call resolution."""
+    check_budget()
     paths = sorted(Path(root).rglob("*.py"))
     processed_paths = paths[:_MAX_FILES]
     file_statuses = {str(path): "skipped_file_cap" for path in paths[_MAX_FILES:]}
@@ -51,6 +55,7 @@ def _build_symbols_and_bindings(
     sources_by_module: dict[str, bytes] = {}
 
     for path in processed_paths:
+        check_budget()
         path_string = str(path)
         try:
             result = extract_symbols_from_file(path)
@@ -76,45 +81,54 @@ def _build_symbols_and_bindings(
         dunder_all_by_module[module_path] = extract_dunder_all(source, path_string)
         init_modules[module_path] = path.name == "__init__.py"
         sources_by_module[module_path] = source
+        check_budget()
 
-    bindings_by_module = {
-        module_path: resolve_file_imports(
+    bindings_by_module = {}
+    for module_path in sorted(symbols_by_module):
+        check_budget()
+        bindings_by_module[module_path] = resolve_file_imports(
             raw_imports_by_module[module_path],
             module_path,
             init_modules[module_path],
             symbols_by_module,
         )
-        for module_path in sorted(symbols_by_module)
-    }
+        check_budget()
+    check_budget()
     bindings_by_module = resolve_reexports_and_stars(
         bindings_by_module, symbols_by_module, dunder_all_by_module
     )
+    check_budget()
     return symbols_by_module, bindings_by_module, file_statuses, sources_by_module
 
 
-def build_project_graph(root: str) -> ProjectGraph:
+def build_project_graph(
+    root: str, *, check_budget: Callable[[], None] = lambda: None
+) -> ProjectGraph:
     """Build one evidence-preserving call graph from a directory of Python files."""
     symbols_by_module, bindings_by_module, file_statuses, sources_by_module = (
-        _build_symbols_and_bindings(root)
+        _build_symbols_and_bindings(root, check_budget=check_budget)
     )
-    raw_calls_by_module = {
-        module_path: extract_raw_calls(
+    raw_calls_by_module = {}
+    raw_bases_by_module = {}
+    for module_path, source in sorted(sources_by_module.items()):
+        check_budget()
+        raw_calls_by_module[module_path] = extract_raw_calls(
             source, _file_path_for_module(file_statuses, module_path, root)
         )
-        for module_path, source in sorted(sources_by_module.items())
-    }
-    raw_bases_by_module = {
-        module_path: extract_raw_class_bases(
+        check_budget()
+        raw_bases_by_module[module_path] = extract_raw_class_bases(
             source, _file_path_for_module(file_statuses, module_path, root)
         )
-        for module_path, source in sorted(sources_by_module.items())
-    }
+        check_budget()
+    check_budget()
     class_hierarchy = build_class_hierarchy(raw_bases_by_module, bindings_by_module)
+    check_budget()
     resolved_calls: list[ResolvedCall] = []
     unresolved_calls: list[UnresolvedCall] = []
     unresolved_truncated = False
 
     for module_path in sorted(sources_by_module):
+        check_budget()
         resolved, unresolved = resolve_file_calls(
             raw_calls_by_module[module_path],
             module_path,
@@ -128,13 +142,16 @@ def build_project_graph(root: str) -> ProjectGraph:
                 unresolved_truncated = True
                 continue
             unresolved_calls.append(call)
+        check_budget()
 
-    return ProjectGraph(
+    result = ProjectGraph(
         call_graph=build_call_graph(symbols_by_module, resolved_calls, unresolved_calls),
         file_statuses=file_statuses,
         import_bindings=bindings_by_module,
         unresolved_truncated=unresolved_truncated,
     )
+    check_budget()
+    return result
 
 
 def _file_path_for_module(file_statuses: dict[str, str], module_path: str, root: str) -> str:
