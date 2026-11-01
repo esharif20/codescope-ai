@@ -22,7 +22,7 @@ Must-priority stories from ARCHITECTURE.md. Each maps to exactly one roadmap pha
 ### Symbol & Dependency Analysis
 
 - [ ] **US-02**: User can identify added, modified and removed functions with file and line references
-- [ ] **US-03**: User can trace supported caller relationships and see unresolved edges flagged explicitly
+- [x] **US-03**: User can trace supported caller relationships and see unresolved edges flagged explicitly
 
 ### Route Impact
 
@@ -75,7 +75,7 @@ Explicitly excluded by ARCHITECTURE.md's MVP scope.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | US-02 | Phase 1 | Complete |
-| US-03 | Phase 2 | In Progress (7/9 plans) |
+| US-03 | Phase 2 | In Progress (8/9 plans) |
 | US-04 | Phase 3 | Pending |
 | US-01 | Phase 4 | Pending |
 | US-09 | Phase 4 | Pending |
