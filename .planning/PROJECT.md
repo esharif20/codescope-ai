@@ -17,11 +17,12 @@ runtime behaviour or finds every dependency.
 
 - ✓ US-02: Identify added, modified and removed functions with file and line references — Phase 1
   (`backend/app/analysis/`: Tree-sitter extractor, Pydantic contract, JSON CLI, 46 pytest cases)
+- ✓ US-03: Trace supported caller relationships and see unresolved edges flagged explicitly — Phase 2
+  (deterministic import/call resolver, evidence-preserving NetworkX graph, 124 pytest cases)
 
 ### Active
 
 - [ ] US-01: Submit a supported GitHub PR URL and see analysis status or a clear error
-- [ ] US-03: Trace supported caller relationships and flag unresolved edges
 - [ ] US-04: See potentially affected FastAPI routes and the paths connecting them
 - [ ] US-05: Read a concise AI impact explanation grounded in source evidence
 - [ ] US-08: Explore an interactive dependency graph and selected paths
@@ -90,6 +91,7 @@ runtime behaviour or finds every dependency.
 | Dependencies added incrementally per phase (`uv add` on first need, not front-loaded); `requirements.txt`/`requirements-dev.txt` regenerated from `uv.lock`; backend README updated at each milestone | Explicit process rule from the user, applied from Phase 1 onward | ✓ Good — standing practice for Phase 2+ |
 | Backend hosting stays Cloud Run, not Vercel | Settled architecture decision; cross-cloud credentials to Firestore/GCS would need long-lived keys Cloud Run avoids; hosting is Phase 8, not now | ✓ Good |
 | Frontend static host left open per ARCHITECTURE.md; Vercel is a candidate to resolve that open question at Phase 7 | ARCHITECTURE.md explicitly leaves this undecided ("Firebase Hosting or another free static host") — Vercel fits that gap, with an approved doc amendment when reached | — Pending |
+| Phase 2 call graph records only defensible resolved edges; unresolved/uncertain calls remain source-located evidence outside traversal | Preserves static-analysis precision and prevents guesses from becoming route-impact paths | ✓ Good — validated by 22/22 phase must-haves |
 
 ## Evolution
 
@@ -109,4 +111,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-11-01 after Phase 1 completion*
+*Last updated: 2026-11-01 after Phase 2 completion*
