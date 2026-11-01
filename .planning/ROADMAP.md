@@ -131,7 +131,14 @@ against hand-labelled fixtures
      precision/recall
   4. Uncertain or unresolved relationships appear in the report as explicit uncertainties, never asserted as
      fact
-**Plans**: TBD
+**Plans**: 5 plans (4 waves)
+
+Plans:
+- [ ] 05-01-PLAN.md — Wave 1: Report/provenance contracts and deterministic evidence assembly
+- [ ] 05-02-PLAN.md — Wave 2: Atomic bounded report retention and cleanup-safe publication
+- [ ] 05-03-PLAN.md — Wave 2: Independent hand-labelled call-edge and endpoint-impact evaluation
+- [ ] 05-04-PLAN.md — Wave 3: Frozen controlled demo reports and allowlisted offline loader
+- [ ] 05-05-PLAN.md — Wave 4: Protected live report API, public demo API and complete backend verification
 
 ### Phase 6: RAG & Gemini summary
 **Goal**: Bounded LangChain evidence assembly plus ephemeral Chroma retrieval feed a cited Gemini impact

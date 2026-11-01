@@ -2,15 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: ready
-stopped_at: Phase 04 complete; automated, live and user verification passed
+status: planned
+stopped_at: Phase 05 planned and independently checked; ready for execution
 last_updated: "2026-11-01T17:12:18.220Z"
 last_activity: 2026-11-01
 progress:
   total_phases: 8
   completed_phases: 4
-  total_plans: 18
+  total_plans: 23
   completed_plans: 18
+  percent: 78
 ---
 
 # Project State
@@ -21,13 +22,13 @@ See: .planning/PROJECT.md (updated 2026-11-01)
 
 **Core value:** Show what a PR might affect, why, and the exact code supporting each finding — never claim static
 analysis proves runtime behaviour or finds every dependency.
-**Current focus:** Phase 05 — report JSON & evaluation (planning pending)
+**Current focus:** Phase 05 — report JSON & evaluation (planned)
 
 ## Current Position
 
 Phase: 5
-Plan: Not started
-Status: Phase 4 complete — Phase 5 ready to plan
+Plan: 0 of 5
+Status: Phase 5 planned — five plans passed independent checking
 Last activity: 2026-11-01
 
 Phase 3 delivered static route registration, bounded canonical reverse-impact paths and the public
@@ -37,7 +38,15 @@ The fixture remains conservatively partial because generic constructor assignmen
 Phase 3 is pushed through `4cbde74`; Backend CI passed all 246 tests and Ruff:
 https://github.com/esharif20/codescope-ai/actions/runs/41326179064
 
-Progress: 4/8 phases complete; 18/18 currently planned GSD plans complete (Phase 1 predates GSD plans).
+Progress: 4/8 phases complete; 18/23 currently planned GSD plans complete (Phase 1 predates GSD plans).
+
+Phase 5 is planned as five plans across four waves: report contracts/assembly; atomic retention and
+independent evaluation in parallel; frozen demos; protected live and public demo report APIs.
+All five plans passed structural validation and independent checking. Research remains disabled.
+Proposals include schema v1, a shared canonical JSON byte format, bounded report retention and separate
+public demo endpoints. Controlled scenarios use local fixture locations and SHA256 manifests, without
+invented GitHub links. Evaluation preserves known missing edges and endpoint impacts as false negatives;
+the negative demo uses the genuinely unrelated callers case. No new dependencies are planned.
 
 All five Phase 4 plans delivered validated PR admission, complete immutable snapshots, both-revision symbol
 mapping/source links, an exclusive observable pipeline, and the FastAPI health/analyses API. Latest backend
@@ -151,6 +160,6 @@ The fixture returns partial=True because ordinary constructor assignments also t
 ## Session Continuity
 
 Last session: 2026-11-01T17:12:18Z
-Stopped at: Phase 4 complete; all five plans, automated/live verification and manual source opening passed.
-Next: plan Phase 5 — report JSON & evaluation.
+Stopped at: Phase 5 planned; five plans passed independent checking with no remaining issues.
+Next: execute Phase 5 — 05-01, then 05-02/05-03 in parallel, then 05-04 and 05-05.
 Resume file: None
