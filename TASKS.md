@@ -57,13 +57,23 @@ Epic story: US-02 · GSD Phase 1
 | CS-012 | Tree-sitter Python parser setup | US-02 | 1 | **DONE** | Language built once at import; smoke test parses a trivial module | https://github.com/esharif20/codescope-ai/issues/3 |
 | CS-013 | Symbol extraction with qualified names + ranges | US-02 | 1 | **DONE** | Top-level functions, classes, methods, nested functions in source order with exact 1-based line ranges | https://github.com/esharif20/codescope-ai/issues/4 |
 | CS-014 | Explicit empty / syntax-error / decode handling | US-02 | 1 | **DONE** | Empty → `empty`; broken → `syntax_errors` with recovered symbols and error ranges; non-UTF-8 → `decode_error`; never raises | https://github.com/esharif20/codescope-ai/issues/5 |
-| CS-015 | JSON CLI | US-02 | 1 | **DONE*** | `codescope-parse FILE` prints valid JSON, exit 0; missing file → stderr, exit 1. *Verified via `python -m app.analysis.cli` (what pytest actually exercises) and exit codes 0/0/0/1 across ok/empty/syntax_errors/missing-file; the literal installed `codescope-parse` console script is currently blocked **on this machine** by a uv 0.11.2 + CPython 3.13 macOS interaction (see backend/README.md) — not reproduced on Linux, where CI runs | https://github.com/esharif20/codescope-ai/issues/6 |
+| CS-015 | JSON CLI | US-02 | 1 | **DONE** | `codescope-parse FILE` prints valid JSON, exit 0; missing file → stderr, exit 1. Verified via the literal installed console script directly (root-caused and fixed a global `uv<0.13` bug that was breaking it — see note below), plus `python -m app.analysis.cli` and exit codes 0/0/0/1 across ok/empty/syntax_errors/missing-file | https://github.com/esharif20/codescope-ai/issues/6 |
 | CS-016 | pytest suite | US-02 | 1 | **DONE** | All supported cases green (46/46); guard test asserts `fastapi` is never imported by `app.analysis` | https://github.com/esharif20/codescope-ai/issues/7 |
 
-**Stage 1 complete.** Two genuine issues were found and fixed during verification (not contract
-ambiguities): a `tree-sitter==0.26.0` reference-counting bug that segfaults on deeply nested
-trees (reproduced, isolated, fixed by pinning `<0.26`), and the console-script caveat noted on
-CS-015 above. Full detail in the `feat:` commit message and backend/README.md.
+**Stage 1 complete, no open caveats.** Two genuine issues were found and fixed during verification
+(not contract ambiguities):
+- `tree-sitter==0.26.0` reference-counting bug that segfaults on deeply nested trees — reproduced,
+  isolated by bisection, fixed by pinning `<0.26`.
+- `uv<0.13` wrote editable-install `.pth` files with macOS's `UF_HIDDEN` flag set, which CPython
+  3.13's `site.py` silently skips, breaking the installed `codescope-parse` console script.
+  Confirmed the fix in an isolated test venv, upgraded the global `uv` (0.11.2 → 0.13.6, approved),
+  rebuilt the backend `.venv`, and pinned `[tool.uv] required-version = ">=0.13"` in
+  `backend/pyproject.toml` so this can't silently reproduce for any contributor or in CI.
+
+CI workflow (`.github/workflows/backend-ci.yml`) pins `setup-uv` to the same confirmed-fixed
+version. All commands it runs (`uv sync --extra dev --locked`, `ruff check`, `pytest -q`) verified
+locally against the exact same invocations. Full detail in the `feat:`/fix-up commit messages and
+`backend/README.md`.
 
 ---
 

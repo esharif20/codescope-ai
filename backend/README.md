@@ -6,6 +6,9 @@ ranges, and explicit empty/syntax-error/decode-error handling. Independent of Fa
 
 ## Setup
 
+Requires **uv >= 0.13** (enforced via `[tool.uv] required-version` in `pyproject.toml` -- `uv sync` fails fast
+with a clear message on an older `uv` rather than silently misbehaving; see "Pinned tooling note" below for why).
+
 ```bash
 uv sync --extra dev
 ```
@@ -26,22 +29,20 @@ uv run pytest -q
 ## CLI usage
 
 ```bash
-uv run python -m app.analysis.cli path/to/file.py
-uv run python -m app.analysis.cli path/to/file.py --compact   # single-line JSON
-
-# also installed as a console script, but see the caveat below:
 uv run codescope-parse path/to/file.py
+uv run codescope-parse path/to/file.py --compact   # single-line JSON
+
+# equivalent, if you ever need it:
+uv run python -m app.analysis.cli path/to/file.py
 ```
 
-**Known local-environment caveat:** on this machine, `uv` 0.11.2 writes the editable-install `.pth` file with the
-macOS `UF_HIDDEN` flag set; CPython 3.13's `site.py` silently skips any hidden `.pth` file (an intentional
-security hardening change, not a project bug). That breaks `import app` for anything relying on the `.pth`
-specifically -- the installed `codescope-parse` console script, in particular. `python -m app.analysis.cli` and
-`uv run pytest` are unaffected (the former gets `sys.path[0]` from `-m`'s own cwd injection; the latter is pinned
-via `pythonpath = ["."]` in `pyproject.toml`, deliberately added so test collection never depends on the `.pth`
-mechanism at all). This is specific to uv 0.11.2 + CPython 3.13 on macOS -- it does not reproduce on Linux (no
-`UF_HIDDEN` concept) and is reportedly fixed in newer `uv` releases. Prefer `python -m app.analysis.cli` until
-confirmed otherwise.
+## Pinned tooling note
+
+`uv < 0.13` wrote the editable-install `.pth` file with macOS's `UF_HIDDEN` flag set; CPython 3.13's `site.py`
+silently skips any hidden `.pth` file (intentional security hardening, not a project bug), which broke `import
+app` for the installed `codescope-parse` console script specifically. Confirmed fixed in `uv` 0.13.0 (verified in
+an isolated test venv) and enforced via the `required-version` pin above so this can't silently reproduce. Never
+affected Linux (no `UF_HIDDEN` concept), so CI was never at risk.
 
 ## Pinned dependency note
 

@@ -32,12 +32,13 @@ packages = ["app"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-# Explicit, so test collection does not depend on the editable install's
-# sys.path injection working. Observed on this machine: uv (0.11.2) writes
-# the editable-install .pth with the macOS UF_HIDDEN flag set, which
-# CPython 3.13's site.py silently skips (a real security hardening change,
-# not a bug in this project) -- breaking `import app` for anything that
-# doesn't get cwd-on-sys.path "for free" (`-m`, `-c`), pytest included.
+# Explicit as defense-in-depth, not a required workaround: uv<0.13 wrote the
+# editable-install .pth with macOS's UF_HIDDEN flag set, which CPython 3.13's
+# site.py silently skips (security hardening, not a project bug), breaking
+# `import app` for anything relying on the .pth. Fixed upstream in uv 0.13.0
+# (confirmed) and enforced here via [tool.uv] required-version below, but
+# kept anyway so test collection never depends on editable-install .pth
+# mechanics at all, on any uv version.
 pythonpath = ["."]
 
 [tool.ruff]
@@ -50,3 +51,12 @@ select = ["E", "F", "I", "UP"]
 # contract specifies `class X(str, Enum)` exactly, and ruff itself marks the
 # StrEnum rewrite an "unsafe fix" that can change runtime behavior.
 ignore = ["UP042"]
+
+[tool.uv]
+# <0.13 wrote the editable-install .pth with macOS's UF_HIDDEN flag set,
+# which CPython 3.13 silently skips -- breaking `import app` for the
+# installed console script. Confirmed fixed in 0.13.0; enforced here so
+# `uv sync`/`uv run` fail fast with a clear message instead of silently
+# reproducing it. `uv self update` (or `pip install --upgrade uv` if uv was
+# itself installed via pip) to fix.
+required-version = ">=0.13"
