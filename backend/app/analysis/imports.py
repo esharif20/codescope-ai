@@ -59,9 +59,7 @@ def extract_raw_imports(source: str | bytes, file_path: str) -> list[RawImport]:
 
 def _walk_imports(root: Node, file_path: str) -> list[RawImport]:
     """Iteratively walk the parse tree (explicit stack, no recursion) and
-    emit a RawImport for every `import_statement` node, in source order.
-
-    `import_from_statement` is intentionally not handled here (Task 2).
+    emit a RawImport for every import/from-import statement, in source order.
     """
     raw_imports: list[RawImport] = []
     stack: list[Node] = [root]
@@ -71,6 +69,10 @@ def _walk_imports(root: Node, file_path: str) -> list[RawImport]:
 
         if node.type == "import_statement":
             raw_imports.extend(_handle_import_statement(node, file_path))
+            continue
+
+        if node.type == "import_from_statement":
+            raw_imports.append(_handle_import_from_statement(node, file_path))
             continue
 
         for child in reversed(node.children):
@@ -101,6 +103,74 @@ def _handle_import_statement(node: Node, file_path: str) -> list[RawImport]:
         )
 
     return raw_imports
+
+
+def _handle_import_from_statement(node: Node, file_path: str) -> RawImport:
+    """`from X import Y` -- one RawImport covering every name in the statement
+    (plain, aliased, relative, or star).
+    """
+    line = node.start_point.row + 1
+    module, relative_level = _from_module_and_level(node)
+
+    if _has_wildcard_import(node):
+        return RawImport(
+            kind="from_import",
+            module=module,
+            relative_level=relative_level,
+            names=[("*", None)],
+            is_star=True,
+            line=line,
+            file_path=file_path,
+        )
+
+    names: list[tuple[str, str | None]] = []
+    for name_node in node.children_by_field_name("name"):
+        _, name_entries = _module_and_names(name_node)
+        names.extend(name_entries)
+
+    return RawImport(
+        kind="from_import",
+        module=module,
+        relative_level=relative_level,
+        names=names,
+        is_star=False,
+        line=line,
+        file_path=file_path,
+    )
+
+
+def _from_module_and_level(node: Node) -> tuple[str, int]:
+    """Resolve an `import_from_statement`'s `module_name` field into
+    (module_text, relative_level).
+    """
+    module_name = node.child_by_field_name("module_name")
+    if module_name is None:
+        return "", 0
+
+    if module_name.type == "dotted_name":
+        return _node_text(module_name), 0
+
+    # relative_import: an import_prefix child (N literal '.' characters) plus
+    # an optional trailing dotted_name child.
+    prefix_node = None
+    dotted_node = None
+    for child in module_name.children:
+        if child.type == "import_prefix":
+            prefix_node = child
+        elif child.type == "dotted_name":
+            dotted_node = child
+
+    relative_level = _node_text(prefix_node).count(".") if prefix_node is not None else 0
+    module = _node_text(dotted_node) if dotted_node is not None else ""
+    return module, relative_level
+
+
+def _has_wildcard_import(node: Node) -> bool:
+    """`from X import *` has a direct child of type `wildcard_import` with no
+    field name at all -- detected by scanning `node.children`, not via
+    `child_by_field_name`.
+    """
+    return any(child.type == "wildcard_import" for child in node.children)
 
 
 def _module_and_names(name_node: Node) -> tuple[str, list[tuple[str, str | None]]]:
