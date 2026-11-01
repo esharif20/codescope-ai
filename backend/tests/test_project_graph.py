@@ -105,7 +105,7 @@ def test_build_project_graph_caps_unresolved_entries(tmp_path: Path, monkeypatch
 
 
 def test_project_graph_api_is_reexported() -> None:
-    from app.analysis import (  # noqa: PLC0415
+    from app.analysis import (  # noqa: PLC0415, I001
         build_project_graph as public_build_project_graph,
         callees_of,
         callers_of,

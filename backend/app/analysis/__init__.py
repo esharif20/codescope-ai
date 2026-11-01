@@ -1,4 +1,4 @@
-"""Public API for the Python symbol extraction package.
+"""Public API for the Python symbol extraction and call-graph package.
 
 This module only re-exports; all logic lives in ``models.py`` and
 ``python_symbols.py``.
@@ -14,6 +14,12 @@ from app.analysis.models import (
 )
 from app.analysis.python_symbols import extract_symbols, extract_symbols_from_file
 
+# Preserve the existing Phase 1 import/export sequence above; Phase 2 entries
+# are intentionally additive below it.
+# ruff: noqa: I001
+from app.analysis.call_graph import CallGraph, callees_of, callers_of, reverse_reachable_from
+from app.analysis.project_graph import ProjectGraph, build_project_graph
+
 __all__ = [
     "extract_symbols",
     "extract_symbols_from_file",
@@ -23,4 +29,10 @@ __all__ = [
     "SyntaxIssueKind",
     "ParseResult",
     "ParseStatus",
+    "CallGraph",
+    "ProjectGraph",
+    "build_project_graph",
+    "callers_of",
+    "callees_of",
+    "reverse_reachable_from",
 ]
