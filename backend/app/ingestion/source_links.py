@@ -21,9 +21,16 @@ def source_reference(
     repository = metadata.base_repository if revision == "base" else metadata.head_repository
     sha = metadata.analysis_base_sha if revision == "base" else metadata.head_sha
     ref = SourceReference(
-        revision=revision, repository=repository, commit_sha=sha, file_path=file_path,
-        start_line=start_line, end_line=end_line, url="",
+        revision=revision,
+        repository=repository,
+        commit_sha=sha,
+        file_path=file_path,
+        start_line=start_line,
+        end_line=end_line,
+        url="",
     )
     path = "/".join(quote(segment, safe="") for segment in file_path.split("/"))
     anchor = f"L{start_line}" if start_line == end_line else f"L{start_line}-L{end_line}"
-    return ref.model_copy(update={"url": f"https://github.com/{repository}/blob/{sha}/{path}#{anchor}"})
+    return ref.model_copy(
+        update={"url": f"https://github.com/{repository}/blob/{sha}/{path}#{anchor}"}
+    )
