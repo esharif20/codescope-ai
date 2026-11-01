@@ -1,0 +1,547 @@
+{
+  "schema_version": "1",
+  "cases": [
+    {
+      "case_id": "auth-positive",
+      "fixture_root": "fixtures/sample_fastapi_repo",
+      "source_files": [
+        "__init__.py",
+        "callers.py",
+        "main.py",
+        "routes/__init__.py",
+        "routes/users.py",
+        "services/__init__.py",
+        "services/auth.py",
+        "services/base.py",
+        "tests/__init__.py",
+        "tests/test_services.py"
+      ],
+      "changed_symbols": [
+        "services.auth:get_current_user"
+      ],
+      "seed_changes": [
+        {
+          "symbol_id": "services.auth:get_current_user",
+          "status": "modified",
+          "kind": "function",
+          "old": {
+            "file_path": "services/auth.py",
+            "start_line": 15,
+            "end_line": 16
+          },
+          "new": {
+            "file_path": "services/auth.py",
+            "start_line": 15,
+            "end_line": 16
+          }
+        }
+      ],
+      "expected_edges": [
+        [
+          "callers:call_get_user_directly",
+          "routes.users:get_user"
+        ],
+        [
+          "callers:warm_cache",
+          "services.auth:get_current_user"
+        ],
+        [
+          "callers:call_twice",
+          "services.auth:get_current_user"
+        ],
+        [
+          "routes.users:get_user",
+          "services.auth:get_current_user"
+        ],
+        [
+          "routes.users:get_user",
+          "services.auth:AuthService"
+        ],
+        [
+          "routes.users:get_user",
+          "services.auth:AuthService.login"
+        ],
+        [
+          "routes.users:update_user",
+          "services.auth:get_current_user"
+        ],
+        [
+          "routes.users:update_user",
+          "callers:dispatch"
+        ],
+        [
+          "services.auth:AuthService.login",
+          "services.base:BaseService.audit"
+        ],
+        [
+          "services.auth:AuthService.login",
+          "services.auth:AuthService.check_password"
+        ],
+        [
+          "tests.test_services:test_login_succeeds",
+          "services.auth:AuthService"
+        ],
+        [
+          "tests.test_services:test_login_succeeds",
+          "services.auth:AuthService.login"
+        ]
+      ],
+      "expected_endpoints": [
+        [
+          "main:app",
+          "routes.users:get_user",
+          "GET",
+          "/users/me"
+        ],
+        [
+          "main:app",
+          "routes.users:update_user",
+          "PUT",
+          "/users/{user_id}"
+        ]
+      ],
+      "expected_unresolved": [
+        {
+          "symbol_id": "routes.users:get_user",
+          "file_path": "routes/users.py",
+          "line": 15,
+          "reason": "source-bound receiver unsupported",
+          "status": "unresolved"
+        },
+        {
+          "symbol_id": "tests.test_services:test_login_succeeds",
+          "file_path": "tests/test_services.py",
+          "line": 8,
+          "reason": "source-bound receiver unsupported",
+          "status": "unresolved"
+        }
+      ],
+      "adjudicated_unknowns": [
+        {
+          "symbol_id": "callers:dispatch",
+          "file_path": "callers.py",
+          "line": 24,
+          "reason": "getattr target depends on runtime action"
+        },
+        {
+          "symbol_id": "callers:dispatch",
+          "file_path": "callers.py",
+          "line": 25,
+          "reason": "handler returned by getattr is not source-provable"
+        },
+        {
+          "symbol_id": "callers:run_task",
+          "file_path": "callers.py",
+          "line": 29,
+          "reason": "callback parameter target is unknown"
+        },
+        {
+          "symbol_id": "callers:process",
+          "file_path": "callers.py",
+          "line": 33,
+          "reason": "handler parameter type is unknown"
+        }
+      ],
+      "support_scope": "All local calls in listed Python source, including constructors, inherited self calls, source-bound local receivers and fixture tests; external/builtin targets excluded.",
+      "rationale": "callers.py:9-19 direct calls; routes/users.py:12-22 helper, constructor, source-bound login and dispatch; services/auth.py:7-9 inherited audit and own check; tests/test_services.py:6-8 constructor and source-bound login. main.py:7-8 registers both routes. Seeds follow reverse call direction; call_twice has no route callers."
+    },
+    {
+      "case_id": "unsupported-audit",
+      "fixture_root": "fixtures/sample_fastapi_repo",
+      "source_files": [
+        "__init__.py",
+        "callers.py",
+        "main.py",
+        "routes/__init__.py",
+        "routes/users.py",
+        "services/__init__.py",
+        "services/auth.py",
+        "services/base.py",
+        "tests/__init__.py",
+        "tests/test_services.py"
+      ],
+      "changed_symbols": [
+        "services.base:BaseService.audit"
+      ],
+      "seed_changes": [
+        {
+          "symbol_id": "services.base:BaseService.audit",
+          "status": "modified",
+          "kind": "method",
+          "old": {
+            "file_path": "services/base.py",
+            "start_line": 5,
+            "end_line": 6
+          },
+          "new": {
+            "file_path": "services/base.py",
+            "start_line": 5,
+            "end_line": 6
+          }
+        }
+      ],
+      "expected_edges": [
+        [
+          "callers:call_get_user_directly",
+          "routes.users:get_user"
+        ],
+        [
+          "callers:warm_cache",
+          "services.auth:get_current_user"
+        ],
+        [
+          "callers:call_twice",
+          "services.auth:get_current_user"
+        ],
+        [
+          "routes.users:get_user",
+          "services.auth:get_current_user"
+        ],
+        [
+          "routes.users:get_user",
+          "services.auth:AuthService"
+        ],
+        [
+          "routes.users:get_user",
+          "services.auth:AuthService.login"
+        ],
+        [
+          "routes.users:update_user",
+          "services.auth:get_current_user"
+        ],
+        [
+          "routes.users:update_user",
+          "callers:dispatch"
+        ],
+        [
+          "services.auth:AuthService.login",
+          "services.base:BaseService.audit"
+        ],
+        [
+          "services.auth:AuthService.login",
+          "services.auth:AuthService.check_password"
+        ],
+        [
+          "tests.test_services:test_login_succeeds",
+          "services.auth:AuthService"
+        ],
+        [
+          "tests.test_services:test_login_succeeds",
+          "services.auth:AuthService.login"
+        ]
+      ],
+      "expected_endpoints": [
+        [
+          "main:app",
+          "routes.users:get_user",
+          "GET",
+          "/users/me"
+        ]
+      ],
+      "expected_unresolved": [
+        {
+          "symbol_id": "routes.users:get_user",
+          "file_path": "routes/users.py",
+          "line": 15,
+          "reason": "source-bound receiver unsupported",
+          "status": "unresolved"
+        },
+        {
+          "symbol_id": "tests.test_services:test_login_succeeds",
+          "file_path": "tests/test_services.py",
+          "line": 8,
+          "reason": "source-bound receiver unsupported",
+          "status": "unresolved"
+        }
+      ],
+      "adjudicated_unknowns": [
+        {
+          "symbol_id": "callers:dispatch",
+          "file_path": "callers.py",
+          "line": 24,
+          "reason": "getattr target depends on runtime action"
+        },
+        {
+          "symbol_id": "callers:dispatch",
+          "file_path": "callers.py",
+          "line": 25,
+          "reason": "handler returned by getattr is not source-provable"
+        },
+        {
+          "symbol_id": "callers:run_task",
+          "file_path": "callers.py",
+          "line": 29,
+          "reason": "callback parameter target is unknown"
+        },
+        {
+          "symbol_id": "callers:process",
+          "file_path": "callers.py",
+          "line": 33,
+          "reason": "handler parameter type is unknown"
+        }
+      ],
+      "support_scope": "All local calls in listed Python source, including constructors, inherited self calls, source-bound local receivers and fixture tests; external/builtin targets excluded.",
+      "rationale": "callers.py:9-19 direct calls; routes/users.py:12-22 helper, constructor, source-bound login and dispatch; services/auth.py:7-9 inherited audit and own check; tests/test_services.py:6-8 constructor and source-bound login. main.py:7-8 registers both routes. Seeds follow reverse call direction; call_twice has no route callers."
+    },
+    {
+      "case_id": "unrelated-callers",
+      "fixture_root": "fixtures/sample_fastapi_repo",
+      "source_files": [
+        "__init__.py",
+        "callers.py",
+        "main.py",
+        "routes/__init__.py",
+        "routes/users.py",
+        "services/__init__.py",
+        "services/auth.py",
+        "services/base.py",
+        "tests/__init__.py",
+        "tests/test_services.py"
+      ],
+      "changed_symbols": [
+        "callers:call_twice"
+      ],
+      "seed_changes": [
+        {
+          "symbol_id": "callers:call_twice",
+          "status": "modified",
+          "kind": "function",
+          "old": {
+            "file_path": "callers.py",
+            "start_line": 17,
+            "end_line": 19
+          },
+          "new": {
+            "file_path": "callers.py",
+            "start_line": 17,
+            "end_line": 19
+          }
+        }
+      ],
+      "expected_edges": [
+        [
+          "callers:call_get_user_directly",
+          "routes.users:get_user"
+        ],
+        [
+          "callers:warm_cache",
+          "services.auth:get_current_user"
+        ],
+        [
+          "callers:call_twice",
+          "services.auth:get_current_user"
+        ],
+        [
+          "routes.users:get_user",
+          "services.auth:get_current_user"
+        ],
+        [
+          "routes.users:get_user",
+          "services.auth:AuthService"
+        ],
+        [
+          "routes.users:get_user",
+          "services.auth:AuthService.login"
+        ],
+        [
+          "routes.users:update_user",
+          "services.auth:get_current_user"
+        ],
+        [
+          "routes.users:update_user",
+          "callers:dispatch"
+        ],
+        [
+          "services.auth:AuthService.login",
+          "services.base:BaseService.audit"
+        ],
+        [
+          "services.auth:AuthService.login",
+          "services.auth:AuthService.check_password"
+        ],
+        [
+          "tests.test_services:test_login_succeeds",
+          "services.auth:AuthService"
+        ],
+        [
+          "tests.test_services:test_login_succeeds",
+          "services.auth:AuthService.login"
+        ]
+      ],
+      "expected_endpoints": [],
+      "expected_unresolved": [
+        {
+          "symbol_id": "routes.users:get_user",
+          "file_path": "routes/users.py",
+          "line": 15,
+          "reason": "source-bound receiver unsupported",
+          "status": "unresolved"
+        },
+        {
+          "symbol_id": "tests.test_services:test_login_succeeds",
+          "file_path": "tests/test_services.py",
+          "line": 8,
+          "reason": "source-bound receiver unsupported",
+          "status": "unresolved"
+        }
+      ],
+      "adjudicated_unknowns": [
+        {
+          "symbol_id": "callers:dispatch",
+          "file_path": "callers.py",
+          "line": 24,
+          "reason": "getattr target depends on runtime action"
+        },
+        {
+          "symbol_id": "callers:dispatch",
+          "file_path": "callers.py",
+          "line": 25,
+          "reason": "handler returned by getattr is not source-provable"
+        },
+        {
+          "symbol_id": "callers:run_task",
+          "file_path": "callers.py",
+          "line": 29,
+          "reason": "callback parameter target is unknown"
+        },
+        {
+          "symbol_id": "callers:process",
+          "file_path": "callers.py",
+          "line": 33,
+          "reason": "handler parameter type is unknown"
+        }
+      ],
+      "support_scope": "All local calls in listed Python source, including constructors, inherited self calls, source-bound local receivers and fixture tests; external/builtin targets excluded.",
+      "rationale": "callers.py:9-19 direct calls; routes/users.py:12-22 helper, constructor, source-bound login and dispatch; services/auth.py:7-9 inherited audit and own check; tests/test_services.py:6-8 constructor and source-bound login. main.py:7-8 registers both routes. Seeds follow reverse call direction; call_twice has no route callers."
+    },
+    {
+      "case_id": "cycle-positive",
+      "fixture_root": "fixtures/report_evaluation",
+      "source_files": [
+        "cycle_unresolved.py"
+      ],
+      "changed_symbols": [
+        "cycle_unresolved:second"
+      ],
+      "seed_changes": [
+        {
+          "symbol_id": "cycle_unresolved:second",
+          "status": "modified",
+          "kind": "function",
+          "old": {
+            "file_path": "cycle_unresolved.py",
+            "start_line": 14,
+            "end_line": 15
+          },
+          "new": {
+            "file_path": "cycle_unresolved.py",
+            "start_line": 14,
+            "end_line": 15
+          }
+        }
+      ],
+      "expected_edges": [
+        [
+          "cycle_unresolved:first",
+          "cycle_unresolved:second"
+        ],
+        [
+          "cycle_unresolved:second",
+          "cycle_unresolved:first"
+        ],
+        [
+          "cycle_unresolved:endpoint",
+          "cycle_unresolved:first"
+        ]
+      ],
+      "expected_endpoints": [
+        [
+          "cycle_unresolved:app",
+          "cycle_unresolved:endpoint",
+          "GET",
+          "/cycle"
+        ]
+      ],
+      "expected_unresolved": [
+        {
+          "symbol_id": "cycle_unresolved:dynamic",
+          "file_path": "cycle_unresolved.py",
+          "line": 28,
+          "reason": "callback target is unknown",
+          "status": "unresolved"
+        }
+      ],
+      "adjudicated_unknowns": [
+        {
+          "symbol_id": "cycle_unresolved:dynamic",
+          "file_path": "cycle_unresolved.py",
+          "line": 28,
+          "reason": "callback parameter has no source-provable identity"
+        }
+      ],
+      "support_scope": "All local calls in listed Python source, including constructors, inherited self calls, source-bound local receivers and fixture tests; external/builtin targets excluded.",
+      "rationale": "cycle_unresolved.py:10-15 mutual calls; :18-20 registered endpoint calls first; :23-24 unrelated helper; :27-28 dynamic callback has no known caller or target. :3 raises if executed."
+    },
+    {
+      "case_id": "unresolved-negative",
+      "fixture_root": "fixtures/report_evaluation",
+      "source_files": [
+        "cycle_unresolved.py"
+      ],
+      "changed_symbols": [
+        "cycle_unresolved:dynamic"
+      ],
+      "seed_changes": [
+        {
+          "symbol_id": "cycle_unresolved:dynamic",
+          "status": "modified",
+          "kind": "function",
+          "old": {
+            "file_path": "cycle_unresolved.py",
+            "start_line": 27,
+            "end_line": 28
+          },
+          "new": {
+            "file_path": "cycle_unresolved.py",
+            "start_line": 27,
+            "end_line": 28
+          }
+        }
+      ],
+      "expected_edges": [
+        [
+          "cycle_unresolved:first",
+          "cycle_unresolved:second"
+        ],
+        [
+          "cycle_unresolved:second",
+          "cycle_unresolved:first"
+        ],
+        [
+          "cycle_unresolved:endpoint",
+          "cycle_unresolved:first"
+        ]
+      ],
+      "expected_endpoints": [],
+      "expected_unresolved": [
+        {
+          "symbol_id": "cycle_unresolved:dynamic",
+          "file_path": "cycle_unresolved.py",
+          "line": 28,
+          "reason": "callback target is unknown",
+          "status": "unresolved"
+        }
+      ],
+      "adjudicated_unknowns": [
+        {
+          "symbol_id": "cycle_unresolved:dynamic",
+          "file_path": "cycle_unresolved.py",
+          "line": 28,
+          "reason": "callback parameter has no source-provable identity"
+        }
+      ],
+      "support_scope": "All local calls in listed Python source, including constructors, inherited self calls, source-bound local receivers and fixture tests; external/builtin targets excluded.",
+      "rationale": "cycle_unresolved.py:10-15 mutual calls; :18-20 registered endpoint calls first; :23-24 unrelated helper; :27-28 dynamic callback has no known caller or target. :3 raises if executed."
+    }
+  ]
+}
