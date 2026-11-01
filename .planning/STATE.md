@@ -48,9 +48,10 @@ Progress: 5/8 phases complete; 23/23 currently planned GSD plans complete (Phase
 Phase 6 has not been planned or started; automatic advance is disabled.
 
 Phase 4 is fully accepted: 18/18 must-haves, live GitHub/API check and user-confirmed source highlighting.
-Its FastAPI dependency approval remains recorded. Latest pushed code CI is Phase 3 at 4cbde74:
-https://github.com/esharif20/codescope-ai/actions/runs/41326179064
-Remote documentation is through 077096a; Phase 4/5 implementation remains local and has no remote CI run.
+Its FastAPI dependency approval remains recorded. Phase 4/5 implementation and completion are pushed
+through eb9ff16 on feat/stage-1-python-symbols. Backend CI passed on that exact commit: 665 tests and Ruff.
+https://github.com/esharif20/codescope-ai/actions/runs/41333556516
+GitHub issues #10/#11 are complete and closed; #12 remains open and unstarted with updated readiness.
 
 ## Performance Metrics
 
