@@ -16,7 +16,10 @@ potentially affected functions and API endpoints.
 
 ## Status
 
-Early development.
+**Phase 1 of 8 complete** (see [TASKS.md](TASKS.md) and [.planning/ROADMAP.md](.planning/ROADMAP.md)): a
+Tree-sitter based Python symbol extractor (`backend/app/analysis/`) — functions, classes, methods and nested
+functions, with qualified names, source ranges, and a JSON CLI. See [backend/README.md](backend/README.md) for
+setup and usage. Everything else below is still planned, not built.
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for the system
 design, user stories and planned features.
