@@ -3,7 +3,9 @@
 from copy import deepcopy
 
 import networkx as nx
+import pytest
 
+from app.analysis import impact as impact_module
 from app.analysis.call_graph import CallGraph
 from app.analysis.impact import find_affected_routes
 from app.analysis.models import ResolutionStatus, UnresolvedCall
@@ -94,4 +96,118 @@ def test_path_json_is_independent_of_insertion_order_and_inputs_are_unchanged() 
     assert result.model_dump_json() == find_affected_routes(
         _graph(list(reversed(edges))), list(reversed(routes)), ["helper", "service"],
     ).model_dump_json()
+    assert (nx.node_link_data(graph.graph), graph.unresolved, routes) == snapshot
+
+
+def test_cycles_and_self_loops_terminate_with_shortest_paths() -> None:
+    graph = _graph([
+        ("helper", "helper"), ("service", "helper"), ("helper", "service"),
+        ("handler", "service"), ("handler", "handler"),
+    ])
+    result = find_affected_routes(graph, [_route()], ["helper", "helper"])
+    assert len(result.impacts) == 1
+    assert result.impacts[0].symbols == ["handler", "service", "helper"]
+    assert not result.truncated
+
+
+def test_diamond_path_uses_sorted_first_discovery_and_prefers_shortest() -> None:
+    edges = [
+        ("handler", "z"), ("z", "helper"), ("handler", "a"), ("a", "helper"),
+        ("direct", "helper"), ("direct", "handler"),
+    ]
+    routes = [_route(), _route("direct")]
+    result = find_affected_routes(_graph(edges), routes, ["helper"])
+    assert [item.symbols for item in result.impacts] == [
+        ["direct", "helper"], ["handler", "a", "helper"],
+    ]
+    assert result == find_affected_routes(_graph(list(reversed(edges))), routes, ["helper"])
+
+
+@pytest.mark.parametrize("cap,expected,truncated", [
+    (0, [], True), (1, ["helper"], True), (2, ["helper", "service"], True),
+    (3, ["handler", "helper", "service"], False),
+])
+def test_node_cap_preserves_only_complete_paths(monkeypatch, cap, expected, truncated) -> None:
+    monkeypatch.setattr(impact_module, "_MAX_VISITED_NODES", cap)
+    result = find_affected_routes(
+        _graph([("handler", "service"), ("service", "helper")]),
+        [_route("helper"), _route("service"), _route()], ["helper"],
+    )
+    assert [item.route.handler_id for item in result.impacts] == expected
+    assert result.truncated is truncated
+    for item in result.impacts:
+        assert item.symbols[0] == item.route.handler_id
+        assert item.symbols[-1] == "helper"
+        assert len(item.edges) == len(item.symbols) - 1
+        assert all(edge.lines == [4, 12] for edge in item.edges)
+
+
+def test_node_cap_is_invocation_wide_counts_roots_and_deduplicates_changes(monkeypatch) -> None:
+    monkeypatch.setattr(impact_module, "_MAX_VISITED_NODES", 1)
+    graph = _graph([], ("a", "b"))
+    result = find_affected_routes(graph, [_route("b"), _route("a")], ["b", "a", "a"])
+    assert [item.changed_symbol for item in result.impacts] == ["a"]
+    assert result.truncated
+    exact = find_affected_routes(graph, [_route("a")], ["a", "a"])
+    assert len(exact.impacts) == 1
+    assert not exact.truncated
+
+
+def test_node_cap_counts_revisited_nodes_for_separate_changes(monkeypatch) -> None:
+    monkeypatch.setattr(impact_module, "_MAX_VISITED_NODES", 2)
+    result = find_affected_routes(_graph([("handler", "helper")]), [_route()], ["handler", "helper"])
+    assert [item.changed_symbol for item in result.impacts] == ["handler"]
+    assert result.truncated
+
+
+@pytest.mark.parametrize("cap,route_count,expected,truncated", [
+    (0, 0, 0, False), (0, 1, 0, True), (1, 1, 1, False), (1, 2, 1, True),
+    (2, 2, 2, False),
+])
+def test_path_cap_marks_only_actual_omissions(monkeypatch, cap, route_count, expected, truncated):
+    monkeypatch.setattr(impact_module, "_MAX_IMPACT_PATHS", cap)
+    result = find_affected_routes(
+        _graph([], ("handler",)), [_route(path=f"/{i}") for i in range(route_count)], ["handler"],
+    )
+    assert len(result.impacts) == expected
+    assert result.truncated is truncated
+    assert all(item.symbols == ["handler"] and not item.edges for item in result.impacts)
+
+
+def test_path_cap_applies_across_changes_and_keeps_unknown_symbols(monkeypatch) -> None:
+    monkeypatch.setattr(impact_module, "_MAX_IMPACT_PATHS", 1)
+    result = find_affected_routes(
+        _graph([], ("a", "b")), [_route("b"), _route("a")], ["unknown", "b", "a"],
+    )
+    assert [item.changed_symbol for item in result.impacts] == ["a"]
+    assert result.unknown_symbols == ["unknown"]
+    assert result.truncated
+
+
+def test_exact_node_cap_with_cycles_has_no_omitted_work(monkeypatch) -> None:
+    monkeypatch.setattr(impact_module, "_MAX_VISITED_NODES", 1)
+    result = find_affected_routes(_graph([("handler", "handler")]), [_route()], ["handler"])
+    assert len(result.impacts) == 1
+    assert not result.truncated
+
+
+def test_zero_node_cap_with_only_unknown_or_no_changes_has_no_omitted_work(monkeypatch) -> None:
+    monkeypatch.setattr(impact_module, "_MAX_VISITED_NODES", 0)
+    graph = _graph([], ("handler",))
+    assert not find_affected_routes(graph, [_route()], []).truncated
+    result = find_affected_routes(graph, [_route()], ["unknown"])
+    assert result.unknown_symbols == ["unknown"]
+    assert not result.truncated
+
+
+def test_truncated_results_are_repeatable_and_do_not_mutate_inputs(monkeypatch) -> None:
+    monkeypatch.setattr(impact_module, "_MAX_VISITED_NODES", 3)
+    edges = [("handler", "a"), ("a", "helper"), ("other", "helper")]
+    graph = _graph(edges)
+    routes = [_route("other"), _route()]
+    snapshot = deepcopy((nx.node_link_data(graph.graph), graph.unresolved, routes))
+    result = find_affected_routes(graph, routes, ["helper"])
+    assert result.truncated
+    assert result == find_affected_routes(graph, routes, ["helper"])
+    assert result == find_affected_routes(_graph(list(reversed(edges))), routes[::-1], ["helper"])
     assert (nx.node_link_data(graph.graph), graph.unresolved, routes) == snapshot
