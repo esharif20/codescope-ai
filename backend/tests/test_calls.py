@@ -1,14 +1,20 @@
-"""Tests for app.analysis.calls raw call-expression extraction.
+"""Tests for app.analysis.calls raw call-expression and class-base extraction.
 
 These tests are written against the pinned contract in
 `.planning/phases/02-imports-resolution-call-graph/02-04-PLAN.md`'s
-<interfaces>/<behavior> sections. `extract_raw_calls` does not resolve
-anything -- these tests only assert the raw, pre-resolution shape.
+<interfaces>/<behavior> sections. Neither `extract_raw_calls` nor
+`extract_raw_class_bases` resolves anything -- these tests only assert the
+raw, pre-resolution shapes.
 """
 
 from __future__ import annotations
 
-from app.analysis.calls import RawCall, extract_raw_calls
+from app.analysis.calls import (
+    RawCall,
+    RawClassBases,
+    extract_raw_calls,
+    extract_raw_class_bases,
+)
 
 # ---------------------------------------------------------------------------
 # Task 1: extract_raw_calls -- receiver classification
@@ -106,3 +112,74 @@ def test_call_inside_nested_function_has_nested_enclosing_symbol():
     assert len(calls) == 1
     assert calls[0].enclosing_symbol == "outer.<locals>.inner"
     assert calls[0].expression == "bar"
+
+
+# ---------------------------------------------------------------------------
+# Task 2: extract_raw_class_bases -- raw inheritance lists
+# ---------------------------------------------------------------------------
+
+
+def test_class_with_no_parens_has_no_bases():
+    source = "class C:\n    pass\n"
+    bases = extract_raw_class_bases(source, "module.py")
+
+    assert len(bases) == 1
+    result = bases[0]
+    assert isinstance(result, RawClassBases)
+    assert result.qualified_name == "C"
+    assert result.bases == []
+    assert result.file_path == "module.py"
+
+
+def test_class_with_two_bases_preserves_source_order():
+    source = "class C(Base1, mod.Base2):\n    pass\n"
+    bases = extract_raw_class_bases(source, "module.py")
+
+    assert len(bases) == 1
+    result = bases[0]
+    assert result.qualified_name == "C"
+    assert result.bases == ["Base1", "mod.Base2"]
+
+
+def test_class_matches_real_fixture_auth_service_shape():
+    # Matches fixtures/sample_fastapi_repo/services/auth.py exactly.
+    source = (
+        "from .base import BaseService\n\n\n"
+        "class AuthService(BaseService):\n"
+        "    def login(self):\n"
+        "        pass\n"
+    )
+    bases = extract_raw_class_bases(source, "services/auth.py")
+
+    assert len(bases) == 1
+    result = bases[0]
+    assert result.qualified_name == "AuthService"
+    assert result.bases == ["BaseService"]
+
+
+def test_nested_class_inside_function_gets_locals_qualified_name():
+    source = "def outer():\n    class Inner(Base):\n        pass\n"
+    bases = extract_raw_class_bases(source, "module.py")
+
+    assert len(bases) == 1
+    result = bases[0]
+    assert result.qualified_name == "outer.<locals>.Inner"
+    assert result.bases == ["Base"]
+
+
+def test_class_with_empty_parens_has_no_bases():
+    source = "class C():\n    pass\n"
+    bases = extract_raw_class_bases(source, "module.py")
+
+    assert len(bases) == 1
+    assert bases[0].bases == []
+
+
+def test_multiple_classes_in_one_file():
+    source = "class A:\n    pass\n\n\nclass B(A):\n    pass\n"
+    bases = extract_raw_class_bases(source, "module.py")
+
+    by_name = {b.qualified_name: b for b in bases}
+    assert set(by_name) == {"A", "B"}
+    assert by_name["A"].bases == []
+    assert by_name["B"].bases == ["A"]

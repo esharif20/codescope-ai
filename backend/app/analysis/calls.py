@@ -1,4 +1,4 @@
-"""Raw call-expression extraction for Python source files.
+"""Raw call-expression and class-base extraction for Python source files.
 
 This module performs **no resolution** -- it only extracts, verbatim, the raw
 shapes Tree-sitter already exposes:
@@ -6,12 +6,14 @@ shapes Tree-sitter already exposes:
 - ``extract_raw_calls`` -- every call expression found lexically inside a
   function/method/nested-function body, tagged with its receiver shape
   (``bare``, ``self``, ``cls``, or ``attribute``).
+- ``extract_raw_class_bases`` -- every class's as-written base-class
+  expression list, in source order.
 
-Resolving these raw shapes into actual call-graph edges is Plan 05 (imports)
-and Plan 06 (call resolution)'s job, not this module's. See
-``python_symbols.py`` for the sibling symbol extractor whose scope-stack
-convention (``_Frame``, ``_qualified_name``) this module reuses rather than
-reimplements.
+Resolving these raw shapes into actual call-graph edges / inheritance links is
+Plan 05 (imports) and Plan 06 (call + hierarchy resolution)'s job, not this
+module's. See ``python_symbols.py`` for the sibling symbol extractor whose
+scope-stack convention (``_Frame``, ``_qualified_name``) this module reuses
+rather than reimplements.
 """
 
 from __future__ import annotations
@@ -42,6 +44,18 @@ class RawCall(BaseModel):
     receiver_kind: Literal["bare", "self", "cls", "attribute"]
     expression: str
     line: int
+    file_path: str
+
+
+class RawClassBases(BaseModel):
+    """One class's raw, as-written base-class expression list.
+
+    ``bases`` preserves source (left-to-right) order and is empty both for
+    ``class C:`` (no parens at all) and ``class C():`` (parens, no bases).
+    """
+
+    qualified_name: str
+    bases: list[str]
     file_path: str
 
 
@@ -144,3 +158,67 @@ def _classify_call(
         return "attribute", full_text
 
     return None, ""
+
+
+def extract_raw_class_bases(source: str | bytes, file_path: str) -> list[RawClassBases]:
+    """Extract every class's raw, as-written base-class expression list.
+
+    A class with no parens at all (``class C:``) has no ``superclasses``
+    field and is reported with ``bases=[]`` -- not an error. Independent
+    traversal from ``extract_raw_calls`` (same rationale as
+    ``_collect_syntax_issues`` being a separate pass from ``_walk_symbols``
+    in ``python_symbols.py``): conflating class-base and call-site
+    collection into one walk risks one half silently breaking the other.
+    """
+    data = source.encode("utf-8") if isinstance(source, str) else source
+    parser = Parser(_LANGUAGE)
+    tree = parser.parse(data)
+    root = tree.root_node
+
+    results: list[RawClassBases] = []
+    stack: list[tuple[Node, tuple[_Frame, ...]]] = [(root, ())]
+
+    while stack:
+        node, scope = stack.pop()
+
+        if node.is_error or node.is_missing:
+            continue
+
+        node_type = node.type
+
+        if node_type == "class_definition":
+            name = _node_name(node)
+            qualified_name = _qualified_name(scope, name)
+            bases = _extract_bases(node)
+            results.append(
+                RawClassBases(qualified_name=qualified_name, bases=bases, file_path=file_path)
+            )
+            body = node.child_by_field_name("body")
+            if body is not None:
+                stack.append((body, scope + ((name, True),)))
+            continue
+
+        if node_type == "function_definition":
+            name = _node_name(node)
+            body = node.child_by_field_name("body")
+            if body is not None:
+                stack.append((body, scope + ((name, False),)))
+            continue
+
+        for child in reversed(node.children):
+            stack.append((child, scope))
+
+    return results
+
+
+def _extract_bases(class_node: Node) -> list[str]:
+    superclasses = class_node.child_by_field_name("superclasses")
+    if superclasses is None:
+        return []
+
+    bases: list[str] = []
+    for child in superclasses.children:
+        if child.type in ("(", ")", ","):
+            continue
+        bases.append(_node_text(child))
+    return bases
