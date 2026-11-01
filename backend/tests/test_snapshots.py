@@ -7,11 +7,11 @@ from copy import deepcopy
 from pathlib import Path
 
 import pytest
+from test_github_ingestion import BASE, HEAD, MERGE, REF, client, metadata, repository, routes
 
 from app.ingestion.models import IngestionError
 from app.ingestion.settings import Limits, Settings
 from app.ingestion.snapshots import fetch_snapshots
-from test_github_ingestion import BASE, HEAD, MERGE, REF, client, metadata, repository, routes
 
 BASE_TREE, HEAD_TREE = "e" * 40, "f" * 40
 
@@ -77,7 +77,8 @@ def test_complete_pinned_snapshots_include_unchanged_callers_and_cleanup():
         assert pair.metadata.analysis_base_sha == MERGE
         assert pair.files[0].old_blob_sha == blob_sha(b"def f():\n    return 1\n")
         assert all(root.stat().st_mode & 0o077 == 0 for root in roots)
-        assert all(path.stat().st_mode & 0o111 == 0 for root in roots for path in root.rglob("*.py"))
+        assert all(path.stat().st_mode & 0o111 == 0
+                   for root in roots for path in root.rglob("*.py"))
     assert stages == ["metadata", "sources"]
     assert all(not root.exists() for root in roots)
     assert not any(f"git/commits/{BASE}" in request.full_url for request in fake.calls)
@@ -221,7 +222,8 @@ def test_both_temp_roots_removed_on_every_failure(monkeypatch, failure):
     monkeypatch.setattr(snapshots, "TemporaryDirectory", temporary)
     data = snapshot_fixture()
     if failure == "upstream":
-        data[f"/repos/org/repo/git/blobs/{blob_sha(b'def f():\n    return 1\n')}"] = \
+        digest = blob_sha(b"def f():\n    return 1\n")
+        data[f"/repos/org/repo/git/blobs/{digest}"] = \
             IngestionError("github_unavailable", "GitHub unavailable.", 502)
     if failure == "race":
         pr = metadata()
@@ -248,3 +250,42 @@ def test_regular_executable_git_files_materialize_without_execution_bits():
     github, _ = client(data)
     with fetch_snapshots(REF, github, settings()) as pair:
         assert (pair.head_root / "app.py").stat().st_mode & 0o111 == 0
+
+
+def test_same_length_tampered_content_rejected_by_actual_git_blob_hash():
+    data = snapshot_fixture({"app.py": b"old"}, {"app.py": b"new"})
+    data[f"/repos/org/repo/git/blobs/{blob_sha(b'old')}"]["content"] = \
+        base64.b64encode(b"bad").decode()
+    github, _ = client(data)
+    with pytest.raises(IngestionError):
+        with fetch_snapshots(REF, github, settings()):
+            pytest.fail("tampered source yielded")
+
+
+def test_mode_only_change_is_an_exhaustively_verified_file_change():
+    content = b"pass\n"
+    records = [{"filename": "app.py", "status": "modified", "sha": blob_sha(content)}]
+    data = snapshot_fixture({"app.py": content}, {"app.py": content}, records)
+    data[f"/repos/org/repo/git/trees/{HEAD_TREE}"]["tree"][0]["mode"] = "100755"
+    github, _ = client(data)
+    with fetch_snapshots(REF, github, settings()) as pair:
+        assert pair.files[0].old_blob_sha == pair.files[0].new_blob_sha == blob_sha(content)
+
+
+def test_changed_file_response_sha_must_match_complete_tree():
+    data = snapshot_fixture()
+    data[f"/repos/org/repo/compare/{MERGE}...{HEAD}"]["files"][0]["sha"] = "0" * 40
+    github, _ = client(data)
+    with pytest.raises(IngestionError):
+        with fetch_snapshots(REF, github, settings()):
+            pytest.fail("invented compare blob yielded")
+
+
+def test_failure_during_second_revision_does_not_yield_partial_snapshot():
+    data = snapshot_fixture()
+    digest = blob_sha(b"def f():\n    return 2\n")
+    data[f"/repos/org/repo/git/blobs/{digest}"]["size"] = 0
+    github, _ = client(data)
+    with pytest.raises(IngestionError):
+        with fetch_snapshots(REF, github, settings()):
+            pytest.fail("partial snapshot yielded")

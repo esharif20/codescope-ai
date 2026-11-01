@@ -6,6 +6,7 @@ import json
 import math
 import re
 from collections.abc import Callable, Mapping
+from http.client import HTTPException
 from typing import Any
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
@@ -210,7 +211,7 @@ class GitHubClient:
         except TimeoutError:
             self.check_budget()
             raise fail("github_unavailable") from None
-        except (URLError, OSError):
+        except (URLError, OSError, HTTPException):
             self.check_budget()
             raise fail("github_unavailable") from None
         finally:
@@ -344,8 +345,11 @@ class GitHubClient:
         except (KeyError, TypeError):
             raise fail() from None
         immutable_paths = [(file.status, file.old_path, file.new_path) for file in files]
-        if len(set(mutable_paths)) != count or set(mutable_paths) != set(immutable_paths):
-            raise fail()
+        try:
+            if len(set(mutable_paths)) != count or set(mutable_paths) != set(immutable_paths):
+                raise fail()
+        except TypeError:
+            raise fail() from None
         metadata = PinnedPullRequest(
             ref=ref, title=data["title"], base_repository=base[0], head_repository=head[0],
             target_base_sha=target, analysis_base_sha=merge, head_sha=head_sha, changed_files=count,

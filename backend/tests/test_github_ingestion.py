@@ -245,3 +245,40 @@ def test_budget_checked_during_body_read():
         github.get_json("/repos/org/repo")
     assert error.value.code == "analysis_timeout"
     assert all(response.closed for response in fake.responses)
+
+
+def test_exact_hundred_records_and_untrusted_link_urls_are_locally_bounded():
+    data = routes(metadata(changed_files=100))
+    records = [{"filename": f"file_{index}.py", "status": "added", "sha": BLOB}
+               for index in range(100)]
+    data[f"/repos/org/repo/compare/{MERGE}...{HEAD}"]["files"] = records
+    data["/repos/org/repo/pulls/7/files"] = Response(
+        records, headers={"Link": '<https://evil.invalid/next>; rel="next"'},
+    )
+    github, fake = client(data)
+    pinned, files = github.pin_pull_request(REF)
+    assert pinned.changed_files == len(files) == 100
+    assert sum("/files?" in request.full_url for request in fake.calls) == 1
+
+
+def test_malformed_mutable_record_raises_typed_safe_error():
+    data = routes()
+    data["/repos/org/repo/pulls/7/files"] = [{"filename": [], "status": "modified"}]
+    github, _ = client(data)
+    with pytest.raises(IngestionError) as error:
+        github.pin_pull_request(REF)
+    assert error.value.code == "github_invalid_response"
+
+
+def test_stdlib_redirect_handler_disables_redirect_requests():
+    from app.ingestion.github import _NoRedirect
+
+    assert _NoRedirect().redirect_request(None, None, 302, "redirect", {}, "https://evil") is None
+
+
+def test_exhausted_analysis_budget_never_reaches_transport():
+    github, fake = client(remaining_seconds=lambda: 0)
+    with pytest.raises(IngestionError) as error:
+        github.get_json("/repos/org/repo")
+    assert error.value.code == "analysis_timeout"
+    assert not fake.calls
