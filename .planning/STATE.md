@@ -19,8 +19,11 @@ end-to-end. CS-010–CS-016 closed (GitHub issues #1-7), no open caveats. Two re
 verification: a tree-sitter 0.26.0 Node reference-counting bug that segfaults on deep trees (pinned
 `tree-sitter<0.26`), and a `uv<0.13` bug writing hidden editable-install `.pth` files that CPython 3.13 silently
 skips — confirmed the fix, upgraded global `uv` to 0.13.6 (approved), rebuilt the venv, and pinned `[tool.uv]
-required-version = ">=0.13"` so it can't silently reproduce. CI (`.github/workflows/backend-ci.yml`) pins the
-same fixed `setup-uv` version.
+required-version = ">=0.13"` so it can't silently reproduce. Pushed `feat/stage-1-python-symbols` (approved) and
+confirmed the Backend CI workflow green end-to-end on GitHub: https://github.com/esharif20/codescope-ai/actions/runs/41312936528
+(first run failed on a real authoring mistake — `astral-sh/setup-uv@v10` isn't a real ref, no floating major-tag
+exists for that action — fixed by pinning both actions to exact commit SHAs, which is also the correct
+best-practice over tags generally).
 
 Progress: [█░░░░░░░░░] 1/8 phases (12.5%)
 
