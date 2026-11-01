@@ -155,7 +155,9 @@ def test_node_cap_is_invocation_wide_counts_roots_and_deduplicates_changes(monke
 
 def test_node_cap_counts_revisited_nodes_for_separate_changes(monkeypatch) -> None:
     monkeypatch.setattr(impact_module, "_MAX_VISITED_NODES", 2)
-    result = find_affected_routes(_graph([("handler", "helper")]), [_route()], ["handler", "helper"])
+    result = find_affected_routes(
+        _graph([("handler", "helper")]), [_route()], ["handler", "helper"],
+    )
     assert [item.changed_symbol for item in result.impacts] == ["handler"]
     assert result.truncated
 
@@ -211,3 +213,22 @@ def test_truncated_results_are_repeatable_and_do_not_mutate_inputs(monkeypatch) 
     assert result == find_affected_routes(graph, routes, ["helper"])
     assert result == find_affected_routes(_graph(list(reversed(edges))), routes[::-1], ["helper"])
     assert (nx.node_link_data(graph.graph), graph.unresolved, routes) == snapshot
+
+
+def test_path_cap_exact_bound_allows_later_changes_with_no_impacts(monkeypatch) -> None:
+    monkeypatch.setattr(impact_module, "_MAX_IMPACT_PATHS", 1)
+    result = find_affected_routes(_graph([], ("handler", "unrelated")), [_route()],
+                                  ["handler", "unrelated", "unknown"])
+    assert len(result.impacts) == 1
+    assert not result.truncated
+    assert result.unknown_symbols == ["unknown"]
+
+
+def test_deep_path_is_iterative_and_preserves_all_edges() -> None:
+    symbols = [f"symbol_{i}" for i in range(1100)]
+    result = find_affected_routes(
+        _graph(list(zip(symbols, symbols[1:]))), [_route(symbols[0])], [symbols[-1]],
+    )
+    assert result.impacts[0].symbols == symbols
+    assert len(result.impacts[0].edges) == len(symbols) - 1
+    assert not result.truncated
