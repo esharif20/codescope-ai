@@ -147,6 +147,7 @@ class RevisionReport(Contract):
     @model_validator(mode="after")
     def check_graph(self):
         nodes = {node.symbol_id for node in self.nodes}
+        node_index = {node.symbol_id: node for node in self.nodes}
         edges = {(edge.caller, edge.callee): edge for edge in self.edges}
         if len(nodes) != len(self.nodes) or len(edges) != len(self.edges):
             raise ValueError("duplicate graph identities")
@@ -157,6 +158,8 @@ class RevisionReport(Contract):
                 edges.get((e.caller, e.callee)) != e for e in finding.edges
             ):
                 raise ValueError("finding lacks verified graph evidence")
+            if finding.route.handler != node_index[finding.route.handler_id].source:
+                raise ValueError("route handler contradicts verified node evidence")
         if any(evidence_revision(ref) != self.revision for ref in _references(self)):
             raise ValueError("evidence revision contradicts graph")
         return self

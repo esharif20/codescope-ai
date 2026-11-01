@@ -85,3 +85,19 @@ def test_dangling_edges_and_paths():
     )
     with pytest.raises(ValidationError):
         ReportFinding(changed_symbol="main:g", route=route, symbols=["main:f", "main:g"], edges=[])
+
+
+def test_route_handler_must_match_verified_node_source():
+    source = ref()
+    node = ReportNode(symbol_id="main:f", kind="function", source=source)
+    route = ReportRoute(
+        app_id="main:app",
+        handler_id="main:f",
+        method="GET",
+        path="/",
+        declaration=source,
+        handler=source.model_copy(update={"start_line": 2}),
+    )
+    finding = ReportFinding(changed_symbol="main:f", route=route, symbols=["main:f"])
+    with pytest.raises(ValidationError, match="handler contradicts verified node"):
+        RevisionReport(revision="base", nodes=[node], findings=[finding])

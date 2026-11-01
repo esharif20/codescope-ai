@@ -66,13 +66,13 @@ completed: 2026-11-01
 - `backend/app/reporting/__init__.py` — public contract exports.
 - `backend/app/reporting/models.py` — schema v1 and provenance/reference consistency validation.
 - `backend/app/reporting/builder.py` — canonical bytes, source manifests and evidence-checked report construction.
-- `backend/tests/test_report_models.py` — six boundary-validation tests.
-- `backend/tests/test_report_builder.py` — twelve source/evidence, determinism, limit, safety and omission tests.
+- `backend/tests/test_report_models.py` — seven boundary-validation tests.
+- `backend/tests/test_report_builder.py` — sixteen source/evidence, determinism, limit, safety and omission tests.
 
 ## Verification
 
 - Both RED test runs failed at collection for their then-missing implementation module, as expected.
-- `uv run --no-sync python -m pytest tests/test_report_models.py tests/test_report_builder.py -q` — **18 passed**.
+- `uv run --no-sync python -m pytest tests/test_report_models.py tests/test_report_builder.py -q` — **23 passed**, including five review regressions added after initial completion.
 - `uv run --no-sync ruff check app/reporting tests/test_report_models.py tests/test_report_builder.py` — **passed**.
 - `git diff --check` — **passed** before the final source-only nonexecution regression was added; Ruff and focused tests passed after that addition.
 - Source containing a marker-writing payload and top-level raise was parsed only; the marker was never created.
@@ -84,7 +84,24 @@ Followed the plan's exact shared JSON and provenance contracts. Controlled snaps
 
 ## Deviations from Plan
 
-None — the two tasks followed the planned RED/GREEN flow. Shared tracker and requirement updates are delegated to the parent orchestrator, as explicitly assigned.
+The two tasks followed the planned RED/GREEN flow. Shared tracker and requirement updates are delegated to the parent orchestrator, as explicitly assigned.
+
+### Review Corrections
+
+**1. [Rule 1 - Bug] Preserve trusted root aliases during relative-path conversion**
+- **Found during:** Independent review after Task 2.
+- **Issue:** Resolving the trusted root before converting analyzer paths rejected lexical ancestor aliases such as macOS `/var` versus `/private/var`.
+- **Fix:** Retain the original absolute trusted root alongside its resolved root; accept either spelling while validating every source suffix for traversal and symlinks.
+- **Files:** `backend/app/reporting/builder.py`, `backend/tests/test_report_builder.py`.
+- **Verification:** Alias and original snapshots produce identical canonical report bytes.
+
+**2. [Rule 1 - Bug] Require route handler evidence to match its verified graph node**
+- **Found during:** Independent review after Task 2.
+- **Issue:** An otherwise valid source range could contradict the handler node's actual file/range, and declaration identity could contradict registration identity.
+- **Fix:** Validate declaration handler identity during assembly and compare report handler evidence exactly with the referenced node source during model validation.
+- **Files:** Reporting models/builder and both focused test files.
+- **Verification:** Range, file and declaration-identity tampering fail with `report_evidence_invalid`; direct schema validation rejects contradictory handler evidence.
+- **Commit:** Recorded by the follow-up `fix(05-01)` commit containing these corrections and this summary update.
 
 ## Issues Encountered
 

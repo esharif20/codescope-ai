@@ -97,6 +97,7 @@ def build_report(
         inputs = ReportInput.model_validate(inputs.model_dump())
         if set(roots) != {"base", "head"}:
             raise ValueError("missing revision root")
+        lexical_roots = {rev: root.absolute() for rev, root in roots.items()}
         roots = {rev: root.resolve(strict=True) for rev, root in roots.items()}
     except (ValueError, OSError) as error:
         raise _invalid() from error
@@ -116,9 +117,13 @@ def build_report(
         )
 
     def relative(rev, path):
-        raw = Path(path)
-        # Do not resolve away symlinks before validating the lexical path.
-        relative_path = raw.relative_to(roots[rev]).as_posix()
+        raw = Path(path).absolute()
+        # Trusted root ancestors may be aliases (for example macOS /var).
+        # Never resolve a source suffix before checking it for symlinks.
+        try:
+            relative_path = raw.relative_to(lexical_roots[rev]).as_posix()
+        except ValueError:
+            relative_path = raw.relative_to(roots[rev]).as_posix()
         _safe_path(roots[rev], relative_path)
         return relative_path
 
@@ -209,6 +214,8 @@ def build_report(
                 check_budget()
                 registration = impact.route
                 declaration = registration.declaration
+                if declaration.handler_id != registration.handler_id:
+                    raise ValueError("declaration contradicts handler identity")
                 route = ReportRoute(
                     app_id=registration.app_id,
                     handler_id=registration.handler_id,

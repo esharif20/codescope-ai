@@ -251,3 +251,36 @@ def test_source_payload_never_executes(tmp_path):
         )
     assert build(data)
     assert not marker.exists()
+
+
+def test_trusted_ancestor_alias_preserves_report_bytes(tmp_path):
+    data = setup(tmp_path / "real")
+    expected = canonical_json_bytes(build(data))
+    alias = tmp_path / "alias"
+    alias.symlink_to(tmp_path / "real", target_is_directory=True)
+    aliased_roots = {revision: alias / revision for revision in ("base", "head")}
+    aliased_analyses = {
+        revision: analyze_route_impacts(str(root), ["main:helper", "main:handler"])
+        for revision, root in aliased_roots.items()
+    }
+    assert (
+        canonical_json_bytes(build_report(data[0], roots=aliased_roots, **aliased_analyses))
+        == expected
+    )
+
+
+@pytest.mark.parametrize("mutation", ["range", "identity", "file"])
+def test_contradictory_handler_evidence_fails_closed(tmp_path, mutation):
+    data = setup(tmp_path)
+    declaration = data[2]["head"].impact.impacts[0].route.declaration
+    if mutation == "range":
+        declaration.handler_line = declaration.handler_end_line = 1
+    elif mutation == "identity":
+        declaration.handler_id = "main:helper"
+    else:
+        other = data[1]["head"] / "other.py"
+        other.write_bytes((data[1]["head"] / "main.py").read_bytes())
+        declaration.file_path = str(other)
+    with pytest.raises(IngestionError) as error:
+        build(data)
+    assert error.value.code == "report_evidence_invalid"
