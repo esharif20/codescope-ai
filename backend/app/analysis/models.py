@@ -36,6 +36,7 @@ class Symbol(BaseModel):
     qualified_name: str
     kind: SymbolKind
     file_path: str
+    module_path: str | None = None
     start_line: int = Field(ge=1)
     end_line: int
     parent_qualified_name: str | None = None
@@ -61,3 +62,47 @@ class ParseResult(BaseModel):
     status: ParseStatus
     symbols: list[Symbol]
     errors: list[SyntaxIssue]
+
+
+class ResolutionStatus(str, Enum):
+    RESOLVED = "resolved"
+    RESOLVED_EXTERNAL = "resolved_external"
+    UNRESOLVED = "unresolved"
+    UNCERTAIN = "uncertain"
+
+
+class ImportBinding(BaseModel):
+    """One resolved or unresolved name binding introduced by an import statement."""
+
+    imported_name: str
+    source_module: str | None = None
+    source_name: str | None = None
+    status: ResolutionStatus
+    file_path: str
+    line: int
+
+
+class UnresolvedCall(BaseModel):
+    """A call site Phase 2 could not -- or could only ambiguously -- resolve.
+
+    Never a graph node or edge (D-11): lives only in the separate index keyed by
+    `enclosing_symbol`.
+    """
+
+    enclosing_symbol: str
+    file_path: str
+    line: int
+    expression: str
+    status: ResolutionStatus  # UNRESOLVED or UNCERTAIN only
+    candidates: list[str] = Field(default_factory=list)  # populated only when status == UNCERTAIN
+
+
+class ResolvedCall(BaseModel):
+    """One resolved caller -> callee call site, before graph assembly.
+
+    Plan 07 groups these into edges.
+    """
+
+    caller: str
+    callee: str
+    line: int

@@ -1,8 +1,9 @@
 # CodeScope AI -- backend
 
-**Status (Phase 1 of 8 -- see `../TASKS.md` / `../.planning/ROADMAP.md`):** a Tree-sitter based Python symbol
-extractor (`app/analysis/`) -- functions, classes, methods and nested functions, with qualified names, source
-ranges, and explicit empty/syntax-error/decode-error handling. Independent of FastAPI; no web framework yet.
+**Status (Phase 1 of 8 complete; Phase 2 (imports, resolution, call graph) in progress -- see `../TASKS.md` /
+`../.planning/ROADMAP.md`):** a Tree-sitter based Python symbol extractor (`app/analysis/`) -- functions, classes,
+methods and nested functions, with qualified names, source ranges, and explicit empty/syntax-error/decode-error
+handling. Independent of FastAPI; no web framework yet.
 
 ## Setup
 
@@ -14,8 +15,8 @@ uv sync --extra dev
 ```
 
 Dependencies are added incrementally, one phase at a time, via `uv add <package>` only when that phase's code
-first needs it -- e.g. `networkx` isn't added until Phase 2, `fastapi` not until Phase 4, `langchain`/`chromadb`
-not until Phase 6. `pyproject.toml` + `uv.lock` are the source of truth; `requirements.txt` /
+first needs it -- e.g. `networkx` was added at the start of Phase 2, `fastapi` not until Phase 4,
+`langchain`/`chromadb` not until Phase 6. `pyproject.toml` + `uv.lock` are the source of truth; `requirements.txt` /
 `requirements-dev.txt` are regenerated from them after every dependency change
 (`uv export --format requirements.txt --no-dev --no-hashes --no-emit-project -o requirements.txt`, and the same
 with `--extra dev -o requirements-dev.txt`) for tooling that expects plain pip-style files.

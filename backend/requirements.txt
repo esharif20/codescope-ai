@@ -2,6 +2,10 @@
 #    uv export --format requirements.txt --no-dev --no-hashes --no-emit-project -o requirements.txt
 annotated-types==0.8.0
     # via pydantic
+networkx==3.6.1 ; python_full_version < '3.12'
+    # via codescope-backend
+networkx==3.7 ; python_full_version >= '3.12'
+    # via codescope-backend
 pydantic==2.14.2
     # via codescope-backend
 pydantic-core==2.50.2
