@@ -15,13 +15,13 @@ Must-priority stories from ARCHITECTURE.md. Each maps to exactly one roadmap pha
 
 ### Ingestion & Status
 
-- [ ] **US-01**: User can submit a supported GitHub PR URL and see analysis status or a clear error
-- [ ] **US-12**: User sees meaningful progress, timeout and error states during analysis
+- [x] **US-01**: User can submit a supported GitHub PR URL and see analysis status or a clear error
+- [x] **US-12**: User sees meaningful progress, timeout and error states during analysis
 - [ ] **US-13**: Live analyses are restricted and bounded to prevent abuse and runaway cost
 
 ### Symbol & Dependency Analysis
 
-- [ ] **US-02**: User can identify added, modified and removed functions with file and line references
+- [x] **US-02**: User can identify added, modified and removed functions with file and line references
 - [x] **US-03**: User can trace supported caller relationships and see unresolved edges flagged explicitly
 
 ### Route Impact
@@ -31,7 +31,7 @@ Must-priority stories from ARCHITECTURE.md. Each maps to exactly one roadmap pha
 ### Evidence & Navigation
 
 - [ ] **US-05**: User can read a concise AI impact explanation grounded in cited source evidence
-- [ ] **US-09**: User can open source locations pinned to the exact analysed GitHub revision
+- [x] **US-09**: User can open source locations pinned to the exact analysed GitHub revision
 
 ### Exploration UI
 
@@ -74,12 +74,12 @@ Explicitly excluded by ARCHITECTURE.md's MVP scope.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| US-02 | Phase 1 | Complete |
+| US-02 | Phase 4 (Phase 1 extraction foundation) | Complete |
 | US-03 | Phase 2 | Complete |
 | US-04 | Phase 3 | Complete |
-| US-01 | Phase 4 | Pending |
-| US-09 | Phase 4 | Pending |
-| US-12 | Phase 4 | Pending |
+| US-01 | Phase 4 | Complete |
+| US-09 | Phase 4 | Complete |
+| US-12 | Phase 4 | Complete |
 | US-11 | Phase 5 | Pending |
 | US-05 | Phase 6 | Pending |
 | US-08 | Phase 7 | Pending |
@@ -92,4 +92,4 @@ Explicitly excluded by ARCHITECTURE.md's MVP scope.
 
 ---
 *Requirements defined: 2026-11-01*
-*Last updated: 2026-11-01 after Phase 3 completion*
+*Last updated: 2026-11-01 after Phase 4 completion and source-opening confirmation*

@@ -15,21 +15,24 @@ runtime behaviour or finds every dependency.
 
 ### Validated
 
-- ✓ US-02: Identify added, modified and removed functions with file and line references — Phase 1
-  (`backend/app/analysis/`: Tree-sitter extractor, Pydantic contract, JSON CLI, 46 pytest cases)
+- ✓ US-02: Identify added, modified and removed functions with file and line references — Phase 4,
+  building on Phase 1's Tree-sitter extraction foundation (both-revision diff mapping and pinned references)
 - ✓ US-03: Trace supported caller relationships and see unresolved edges flagged explicitly — Phase 2
   (deterministic import/call resolver, evidence-preserving NetworkX graph, 124 pytest cases)
 - ✓ US-04: See potentially affected FastAPI routes and the paths connecting them — validated in Phase 3
   (verified registrations, bounded evidence paths, exact positive/negative fixtures; 246 backend tests)
+- ✓ US-01: Submit a supported GitHub PR URL and see analysis status or a clear error — validated in Phase 4
+  (allowlisted public PRs, immutable snapshots and tested FastAPI submission/status endpoints)
+- ✓ US-09: Open source locations pinned to the analysed GitHub revision — validated in Phase 4
+  (base/head permalinks, live HTTP 200 and user-confirmed source highlighting)
+- ✓ US-12: See meaningful progress, timeout and error states — validated in Phase 4
+  (concurrent UUID polling, cooperative deadlines, safe failures and cleanup; 554 backend tests)
 
 ### Active
 
-- [ ] US-01: Submit a supported GitHub PR URL and see analysis status or a clear error
 - [ ] US-05: Read a concise AI impact explanation grounded in source evidence
 - [ ] US-08: Explore an interactive dependency graph and selected paths
-- [ ] US-09: Open source locations pinned to the analysed GitHub revision
 - [ ] US-11: View precomputed demo reports without signing in
-- [ ] US-12: See meaningful progress, timeout and error states
 - [ ] US-13: Keep live analyses restricted and bounded to prevent abuse and costs
 
 ### Out of Scope
@@ -94,6 +97,8 @@ runtime behaviour or finds every dependency.
 | Frontend static host left open per ARCHITECTURE.md; Vercel is a candidate to resolve that open question at Phase 7 | ARCHITECTURE.md explicitly leaves this undecided ("Firebase Hosting or another free static host") — Vercel fits that gap, with an approved doc amendment when reached | — Pending |
 | Phase 2 call graph records only defensible resolved edges; unresolved/uncertain calls remain source-located evidence outside traversal | Preserves static-analysis precision and prevents guesses from becoming route-impact paths | ✓ Good — validated by 22/22 phase must-haves |
 | Phase 3 verifies static FastAPI registration and returns canonical shortest supported impact chains with explicit bounds | Evidence includes constructor/include/decorator locations and call-site lines; unresolved calls never become paths | ✓ Good — validated by 12/12 phase must-haves; conservative partial diagnostics documented |
+| Phase 4 uses immutable merge-base/head snapshots and same-process synchronous API with concurrent UUID polling | Keeps revision evidence separate, cleanup owned and status observable without workers | ✓ Good — 18/18 must-haves, 554 tests, live API run and user source-opening check passed |
+| Add core FastAPI and required transitives after explicit approval | Implements the chosen API boundary without optional server/test-client extras | ✓ Good — lockfile and both requirements exports synchronized |
 
 ## Evolution
 
@@ -113,4 +118,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-11-01 after Phase 3 completion*
+*Last updated: 2026-11-01 after Phase 4 completion and user source-opening confirmation*

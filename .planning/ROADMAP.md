@@ -24,7 +24,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Python symbol extraction** - Tree-sitter extractor returns structured symbol data, independent of FastAPI (completed 2026-11-01)
 - [x] **Phase 2: Imports, resolution, call graph** - Resolve imports/direct calls into a NetworkX call graph with explicit unresolved edges (completed 2026-11-01)
 - [x] **Phase 3: FastAPI routes & impact paths** - Detect FastAPI routes and trace reverse-dependency paths from changes to routes (completed 2026-11-01)
-- [ ] **Phase 4: PR ingestion & diff mapping** - Fetch real PRs at pinned SHAs, map diffs to symbols, expose status/progress via the API
+- [x] **Phase 4: PR ingestion & diff mapping** - Fetch real PRs at pinned SHAs, map diffs to symbols, expose status/progress via the API (completed 2026-11-01)
 - [ ] **Phase 5: Report JSON & evaluation** - Build structured report JSON and evaluate it against hand-labelled fixtures, before Gemini
 - [ ] **Phase 6: RAG & Gemini summary** - Bounded, cited Gemini impact explanation over untrusted repository evidence
 - [ ] **Phase 7: Frontend** - React/Vite/Tailwind/shadcn app with an interactive React Flow dependency graph
@@ -99,7 +99,7 @@ Plans:
 **Goal**: GitHub REST client fetches PR metadata/diffs at pinned SHAs; diff lines map to symbols; `/api/analyses`
 and `/health` expose status/progress/error states
 **Depends on**: Phase 3
-**Requirements**: US-01, US-09, US-12
+**Requirements**: US-01, US-02, US-09, US-12
 **Success Criteria** (what must be TRUE):
   1. User can submit a supported GitHub PR URL and the system fetches PR metadata and diff at pinned base/head
      commit SHAs
@@ -188,7 +188,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | 1. Python symbol extraction | Pre-GSD | Complete | 2026-11-01 |
 | 2. Imports, resolution, call graph | 9/9 | Complete | 2026-11-01 |
 | 3. FastAPI routes & impact paths | 4/4 | Complete | 2026-11-01 |
-| 4. PR ingestion & diff mapping | 5/5 | Verification acceptance pending | - |
+| 4. PR ingestion & diff mapping | 5/5 | Complete | 2026-11-01 |
 | 5. Report JSON & evaluation | 0/TBD | Not started | - |
 | 6. RAG & Gemini summary | 0/TBD | Not started | - |
 | 7. Frontend | 0/TBD | Not started | - |

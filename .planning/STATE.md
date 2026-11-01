@@ -2,16 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: awaiting_decision
-stopped_at: All five Phase 04 plans complete; verification acceptance awaiting user approval
-last_updated: "2026-11-01T16:37:38.297Z"
-last_activity: 2026-11-01 -- Phase 04 execution started
+status: ready
+stopped_at: Phase 04 complete; automated, live and user verification passed
+last_updated: "2026-11-01T17:12:18.220Z"
+last_activity: 2026-11-01
 progress:
   total_phases: 8
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 18
   completed_plans: 18
-  percent: 100
 ---
 
 # Project State
@@ -22,14 +21,14 @@ See: .planning/PROJECT.md (updated 2026-11-01)
 
 **Core value:** Show what a PR might affect, why, and the exact code supporting each finding — never claim static
 analysis proves runtime behaviour or finds every dependency.
-**Current focus:** Phase 04 — pr-ingestion-diff-mapping
+**Current focus:** Phase 05 — report JSON & evaluation (planning pending)
 
 ## Current Position
 
-Phase: 04 (pr-ingestion-diff-mapping) — EXECUTING
-Plan: 5 of 5 complete
-Status: Verification acceptance awaiting approval — 18/18 must-haves verified
-Last activity: 2026-11-01 -- Phase 04 execution started
+Phase: 5
+Plan: Not started
+Status: Phase 4 complete — Phase 5 ready to plan
+Last activity: 2026-11-01
 
 Phase 3 delivered static route registration, bounded canonical reverse-impact paths and the public
 `analyze_route_impacts` library API. All 246 backend tests and Ruff pass; independent verification passed
@@ -38,7 +37,7 @@ The fixture remains conservatively partial because generic constructor assignmen
 Phase 3 is pushed through `4cbde74`; Backend CI passed all 246 tests and Ruff:
 https://github.com/esharif20/codescope-ai/actions/runs/41326179064
 
-Progress: 3/8 phases accepted complete; 18/18 currently planned GSD plans complete (Phase 1 predates GSD plans).
+Progress: 4/8 phases complete; 18/18 currently planned GSD plans complete (Phase 1 predates GSD plans).
 
 All five Phase 4 plans delivered validated PR admission, complete immutable snapshots, both-revision symbol
 mapping/source links, an exclusive observable pipeline, and the FastAPI health/analyses API. Latest backend
@@ -48,8 +47,8 @@ concurrent progress/health, matching final GET and a pinned source URL returning
 was executed. Status is process-local, deadlines cooperative, and unsupported analysis remains partial.
 Phase 4 changes are local. Core FastAPI and required transitives were explicitly approved and installed.
 
-The verifier status is human_needed solely for browser source navigation/highlighting. The manual item
-is persisted in 04-HUMAN-UAT.md; a multiple-choice approval to finish with it pending has been requested.
+The user confirmed the linked source lines are highlighted. Verification status is passed, and
+04-HUMAN-UAT.md is complete with no pending items. Phase 4 is fully accepted.
 
 Checkpoint resolved: user explicitly approved adding FastAPI and finishing Phase 4. Approval covers core
 FastAPI and required transitives, with no standard/server/test-client extras.
@@ -92,6 +91,11 @@ approval for core FastAPI and required transitives before dependency changes; no
 | Phase 03 P02 | 4min | 2 tasks | 2 files |
 | Phase 03 P03 | 3min | 2 tasks | 2 files |
 | Phase 03 P04 | 3min | 2 tasks | 5 files |
+| Phase 04 P01 | 7min | 2 tasks | 6 files |
+| Phase 04 P02 | 6min | 2 tasks | 4 files |
+| Phase 04 P03 | 4min | 2 tasks | 4 files |
+| Phase 04 P04 | 4min | 2 tasks | 6 files |
+| Phase 04 P05 | 5min | 3 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -131,6 +135,10 @@ Recent decisions affecting current work:
 - [Phase 03]: Only eligible unshadowed imports prove receivers/router mounts; unsupported forms remain diagnostics.
 - [Phase 03]: Reverse BFS returns one canonical shortest verified chain per route/change; limits report actual omissions.
 - [Phase 03]: The public library API exposes graph, routes, impacts and conservative partial/truncation indicators together.
+- [Phase 04]: Immutable merge-base/head snapshots retain target-base identity separately; changed symbols and links preserve revision provenance.
+- [Phase 04]: Synchronous POST uses a caller UUID for concurrent polling, one active analysis per process, and cooperative deadlines through cleanup.
+- [Phase 04]: User approved core FastAPI and required transitives; dependency lock and exports are synchronized.
+- [Phase 04]: User confirmed pinned-source highlighting; 18/18 must-haves, 554 tests and live API verification passed.
 
 ### Pending Todos
 
@@ -142,7 +150,7 @@ The fixture returns partial=True because ordinary constructor assignments also t
 
 ## Session Continuity
 
-Last session: 2026-11-01T16:12:21.775Z
-Stopped at: All five Phase 4 plans and automated/live verification complete; final acceptance requested.
-Next: on approval, mark Phase 4 complete, update requirements/project/TASKS and GitHub epic #10; retain manual source-opening UAT pending.
+Last session: 2026-11-01T17:12:18Z
+Stopped at: Phase 4 complete; all five plans, automated/live verification and manual source opening passed.
+Next: plan Phase 5 — report JSON & evaluation.
 Resume file: None

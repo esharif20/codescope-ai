@@ -21,14 +21,14 @@ Every user story US-01…US-13 must map to an owning ticket so nothing silently 
 | Story | Owning ticket(s) | Stage |
 | --- | --- | --- |
 | US-01 | CS-040 (GitHub REST client) | Stage 4 |
-| US-02 | CS-010–CS-016 (Python symbol extraction) | Stage 1 |
+| US-02 | CS-010–CS-016 (extraction foundation), CS-041 (both-revision change mapping) | Stages 1, 4 |
 | US-03 | CS-023 (NetworkX graph + reverse reachability) | Stage 2 |
 | US-04 | CS-031 (changed-symbol → route tracing) | Stage 3 |
 | US-05 | CS-062 (cited Gemini explanation) | Stage 6 |
 | US-06 | CS-090 (follow-up Q&A) | Deferred (Later) |
 | US-07 | CS-091 (candidate test selection) | Deferred (Later) |
 | US-08 | CS-071 (React Flow graph + path selection) | Stage 7 |
-| US-09 | CS-043 (`/api/analyses` + `/health` progress states) | Stage 4 |
+| US-09 | CS-042 (SHA-pinned source permalinks) | Stage 4 |
 | US-10 | CS-081 (abuse & cost limits + billing alerts) | Stage 8 |
 | US-11 | CS-051 (evaluation harness on labelled fixtures) | Stage 5 |
 | US-12 | CS-043 (`/api/analyses` + `/health` error states) | Stage 4 |
@@ -108,10 +108,10 @@ Epic story: US-01 / US-02 / US-09 / US-12 · GSD Phase 4 · Epic issue: https://
 
 | ID | Title | Story | GSD Phase | Status | Acceptance criteria | Issue |
 | --- | --- | --- | --- | --- | --- | --- |
-| CS-040 | GitHub REST client (allowlist+limits) | US-01 | 4 | **TODO** | See epic for full context | tracked in epic #10 |
-| CS-041 | Diff → symbol mapping | US-02 | 4 | **TODO** | See epic for full context | tracked in epic #10 |
-| CS-042 | SHA-pinned permalinks | US-01 | 4 | **TODO** | See epic for full context | tracked in epic #10 |
-| CS-043 | `/api/analyses` + `/health` with status/error states | US-09 / US-12 | 4 | **TODO** | See epic for full context | tracked in epic #10 |
+| CS-040 | GitHub REST client (allowlist+limits) | US-01 | 4 | **DONE** | See epic for full context | tracked in epic #10 |
+| CS-041 | Diff → symbol mapping | US-02 | 4 | **DONE** | See epic for full context | tracked in epic #10 |
+| CS-042 | SHA-pinned permalinks | US-09 | 4 | **DONE** | See epic for full context | tracked in epic #10 |
+| CS-043 | `/api/analyses` + `/health` with status/error states | US-01 / US-12 | 4 | **DONE** | See epic for full context | tracked in epic #10 |
 
 ---
 

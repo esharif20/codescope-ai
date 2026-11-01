@@ -1,24 +1,22 @@
 ---
 phase: 04-pr-ingestion-diff-mapping
 verified: 2026-11-01T17:08:00Z
-status: human_needed
+status: passed
 score: 18/18 must-haves verified
-human_verification:
-  - test: Open returned old/new GitHub source links in a browser (nonblocking US-09 external-service acceptance).
-    expected: Each link opens the intended source at its recorded commit, file and line span, including the base-side reference.
-    why_human: The live ASGI/GitHub flow and HTTP permalink availability were verified automatically; browser source navigation and line highlighting were not observed. Verifier instructions require a human check for external service integration.
+human_verification: []
+human_verified: 2026-11-01T17:11:45Z
 ---
 
 # Phase 4: PR ingestion & diff mapping Verification Report
 
 **Phase Goal:** GitHub REST client fetches PR metadata/diffs at pinned SHAs; diff lines map to symbols; `/api/analyses` and `/health` expose status/progress/error states.
 **Verified:** 2026-11-01T17:08:00Z
-**Status:** human_needed
+**Status:** passed
 **Re-verification:** No — initial verification; no previous verification report existed.
 
 ## Goal Achievement
 
-All 18 truths declared across the five plans have implementation and automated behavioral evidence. All five roadmap success criteria are covered by the actual API, ingestion and mapping code, including a successful live GitHub round trip through actual ASGI POST and concurrent GET. The sole remaining human item is browser source navigation and line highlighting; no implementation gap remains.
+All 18 truths declared across the five plans have implementation and automated behavioral evidence. All five roadmap success criteria are covered by the actual API, ingestion and mapping code, including a successful live GitHub round trip through actual ASGI POST and concurrent GET. The user confirmed source navigation and highlighted lines: "yes those lines are higlted". No implementation or manual-verification gap remains.
 
 Read `ARCHITECTURE.md`, `AGENTS.md`, `CLAUDE.md`, PROJECT, ROADMAP, REQUIREMENTS, and all five Phase 4 plans/summaries. No project `.claude/skills/` or `.agents/skills/` skill files were found. Summaries supplied scope and file lists; conclusions below come from code inspection and executed checks.
 
@@ -133,6 +131,8 @@ No blocking TODO/stub/placeholder or source-execution path found in Phase 4 impl
 
 ### Human Verification Required
 
+Completed on 2026-11-01: the user opened the supplied source link and confirmed "yes those lines are higlted". The original check below is retained for the audit trail; 04-HUMAN-UAT.md records its passing result.
+
 ### 1. US-09 source opening (nonblocking external-service acceptance)
 
 **Test:** Open the returned old/new GitHub source links from the verified live analysis, including the base-side reference.
@@ -143,7 +143,7 @@ No blocking TODO/stub/placeholder or source-execution path found in Phase 4 impl
 
 ### Gaps Summary
 
-No unresolved implementation gap remains. Both the complexity-limit HTTP mismatch and live-discovered macOS ancestor-symlink bug were fixed and independently retested. Final automated checks cover all 18 plan truths and all five roadmap outcomes. A real API/GitHub round trip, concurrent progress and immutable permalink availability also passed. Status is `human_needed` solely for the precise browser navigation/highlighting observation above, as required by the verifier's external-integration rule; live API behavior is not pending.
+No unresolved implementation gap remains. Both the complexity-limit HTTP mismatch and live-discovered macOS ancestor-symlink bug were fixed and independently retested. Final automated checks cover all 18 plan truths and all five roadmap outcomes. A real API/GitHub round trip, concurrent progress and immutable permalink availability also passed. The user confirmed browser navigation/highlighting, resolving the final human-verification item; status is `passed`.
 
 Limitations are explicit and consistent with phase scope: synchronous POST with concurrent UUID polling; process-local ephemeral status; one active analysis per process; cooperative rather than hard parser preemption; approved small public Python repositories only; no graph/report endpoints, frontend, durable cache, RAG or deployment yet.
 
