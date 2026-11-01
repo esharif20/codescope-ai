@@ -1,0 +1,109 @@
+from contextlib import contextmanager
+from pathlib import Path
+from threading import Event, Thread
+from uuid import uuid4
+
+import pytest
+
+from app.ingestion import pipeline
+from app.ingestion.models import (
+    AnalysisRequest, ChangedFile, IngestionError, PinnedPullRequest, PullRequestRef, SnapshotPair,
+)
+from app.ingestion.runtime import AnalysisRegistry
+from app.ingestion.settings import Settings
+
+
+@pytest.fixture
+def setup_pipeline(tmp_path, monkeypatch):
+    settings = Settings(allowed_repositories={"a/b"}, live_access_token="access")
+    registry = AnalysisRegistry(settings)
+    metadata = PinnedPullRequest(ref=PullRequestRef(owner="a", repo="b", number=1),
+        title="test", base_repository="a/b", head_repository="a/b",
+        target_base_sha="a" * 40, analysis_base_sha="b" * 40, head_sha="c" * 40,
+        changed_files=1)
+    roots = [tmp_path / "base", tmp_path / "head"]
+    for root in roots:
+        root.mkdir()
+        (root / "main.py").write_text(
+            'from fastapi import FastAPI\napp = FastAPI()\n'
+            '@app.get("/x")\ndef route():\n    return helper()\n'
+            'def helper():\n    return 1\n')
+    (roots[1] / "main.py").write_text((roots[1] / "main.py").read_text().replace("return 1", "return 2"))
+    cleaned = []
+    @contextmanager
+    def snapshots(ref, client, config, *, check_budget, on_stage):
+        on_stage("metadata")
+        check_budget()
+        on_stage("sources")
+        try:
+            yield SnapshotPair(metadata, *roots,
+                [ChangedFile(old_path="main.py", new_path="main.py", status="modified")], [])
+        finally:
+            # Admission must remain owned throughout cleanup, even after failure.
+            with pytest.raises(IngestionError) as caught:
+                registry.reserve(AnalysisRequest(analysis_id=uuid4(), pr_url="unused"))
+            assert caught.value.code == "analysis_busy"
+            cleaned.append(True)
+    monkeypatch.setattr(pipeline, "fetch_snapshots", snapshots)
+    item = AnalysisRequest(analysis_id=uuid4(), pr_url="https://github.com/a/b/pull/1")
+    return settings, registry, item, roots, cleaned
+
+
+def run(setup):
+    settings, registry, item, _, _ = setup
+    return pipeline.run_analysis(item, registry, settings, client_factory=lambda *a, **kw: object())
+
+
+def test_two_revisions_real_mapping_and_graphs(setup_pipeline):
+    result = run(setup_pipeline)
+    assert result.state == "complete"
+    assert result.summary.affected_routes_base == result.summary.affected_routes_head == 1
+    assert [(c.symbol_id, c.status) for c in result.summary.changed_symbols] == [("main:helper", "modified")]
+    assert result.summary.changed_symbols[0].old.commit_sha == "b" * 40
+    assert result.summary.changed_symbols[0].new.commit_sha == "c" * 40
+    assert result.summary.partial
+    assert setup_pipeline[-1] == [True]
+    assert str(setup_pipeline[3][0]) not in result.model_dump_json()
+
+
+def test_removed_seeds_only_base_and_unrelated_has_no_routes(setup_pipeline):
+    head = setup_pipeline[3][1] / "main.py"
+    head.write_text(head.read_text().split("def helper")[0])
+    result = run(setup_pipeline)
+    assert result.summary.affected_routes_base == 1
+    assert result.summary.affected_routes_head == 0
+    assert result.summary.changed_symbols[0].status == "removed"
+
+
+@pytest.mark.parametrize("failure", ["timeout", "exception"])
+def test_fault_cleanup_no_partial_success(setup_pipeline, monkeypatch, failure):
+    def fail(*a, **kw):
+        if failure == "timeout":
+            raise IngestionError("analysis_timeout", "Analysis timed out.", 504)
+        raise RuntimeError("secret /private/source")
+    monkeypatch.setattr(pipeline, "map_snapshot_changes", fail)
+    result = run(setup_pipeline)
+    assert result.state == ("timeout" if failure == "timeout" else "error")
+    assert result.summary is None
+    assert "secret" not in result.model_dump_json()
+    assert setup_pipeline[-1] == [True]
+    setup_pipeline[1].reserve(AnalysisRequest(analysis_id=uuid4(), pr_url="unused"))
+
+
+def test_polling_while_work_is_active(setup_pipeline, monkeypatch):
+    entered, proceed = Event(), Event()
+    original = pipeline.map_snapshot_changes
+    def pause(*a, **kw):
+        entered.set()
+        assert proceed.wait(5)
+        return original(*a, **kw)
+    monkeypatch.setattr(pipeline, "map_snapshot_changes", pause)
+    thread = Thread(target=run, args=(setup_pipeline,))
+    thread.start()
+    try:
+        assert entered.wait(5)
+        assert setup_pipeline[1].get(setup_pipeline[2].analysis_id).stage == "mapping"
+    finally:
+        proceed.set()
+        thread.join(5)
+    assert not thread.is_alive()
