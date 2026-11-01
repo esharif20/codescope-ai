@@ -63,7 +63,7 @@ invented
 **Plans**: 9 plans (7 waves)
 
 Plans:
-- [ ] 02-01-PLAN.md — Wave 1: Symbol.module_path + new resolution contracts + module_path_for (D-08) + add networkx dependency
+- [x] 02-01-PLAN.md — Wave 1: Symbol.module_path + new resolution contracts + module_path_for (D-08) + add networkx dependency
 - [ ] 02-02-PLAN.md — Wave 1: Build the real fixtures/sample_fastapi_repo/ sample package (CS-020)
 - [ ] 02-03-PLAN.md — Wave 2: Raw import statement extraction (CS-021, import half)
 - [ ] 02-04-PLAN.md — Wave 2: Raw call-site + class-base extraction (CS-021, call half)

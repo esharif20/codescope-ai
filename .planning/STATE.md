@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: planning
-stopped_at: Phase 2 context gathered
-last_updated: "2026-11-01T14:15:26.595Z"
-last_activity: "2026-11-01 — Phase 1 implemented (`backend/app/analysis/`: Pydantic models, tree-sitter walk, JSON"
+status: executing
+stopped_at: Completed 02-01-PLAN.md
+last_updated: "2026-11-01T14:54:41.585Z"
+last_activity: 2026-11-01
 progress:
   total_phases: 8
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 9
+  completed_plans: 1
   percent: 5
 ---
 
@@ -22,14 +22,14 @@ See: .planning/PROJECT.md (updated 2026-11-01)
 
 **Core value:** Show what a PR might affect, why, and the exact code supporting each finding — never claim static
 analysis proves runtime behaviour or finds every dependency.
-**Current focus:** Phase 2 — Imports, resolution, call graph
+**Current focus:** Phase 02 — imports-resolution-call-graph
 
 ## Current Position
 
-Phase: 1 of 8 complete (Python symbol extraction) — Phase 2 not yet started
-Plan: Phase 1 implemented directly (by design — see Decisions below), not via `/gsd:plan-phase`/`/gsd:execute-phase`
-Status: Phase 1 done and verified; ready to plan Phase 2
-Last activity: 2026-11-01 — Phase 1 implemented (`backend/app/analysis/`: Pydantic models, tree-sitter walk, JSON
+Phase: 02 (imports-resolution-call-graph) — EXECUTING
+Plan: 2 of 9
+Status: Ready to execute
+Last activity: 2026-11-01
 CLI), 46/46 pytest green, ruff clean, isolation guard passing, console script (`codescope-parse`) working
 end-to-end. CS-010–CS-016 closed (GitHub issues #1-7), no open caveats. Two real findings fixed during
 verification: a tree-sitter 0.26.0 Node reference-counting bug that segfaults on deep trees (pinned
@@ -63,6 +63,7 @@ Progress: [█░░░░░░░░░] 1/8 phases (12.5%)
 - Trend: -
 
 *Updated after each plan completion*
+| Phase 02 P01 | 2min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -85,6 +86,10 @@ Recent decisions affecting current work:
 - `tree-sitter` pinned to `<0.26` (resolves to 0.25.2) after reproducing a reference-counting segfault in 0.26.0's
   Node binding on deeply nested trees — re-test deliberately before raising this ceiling.
 
+- [Phase 02]: Symbol.module_path inserted directly after file_path per D-17, additive-only
+- [Phase 02]: module_path_for uses pathlib.Path.relative_to for native ValueError-on-outside-root behavior
+- [Phase 02]: networkx added via uv add with no version ceiling (no known compatibility issue)
+
 ### Pending Todos
 
 None yet.
@@ -95,7 +100,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-11-01T14:15:26.587Z
-Stopped at: Phase 2 context gathered
+Last session: 2026-11-01T14:54:41.582Z
+Stopped at: Completed 02-01-PLAN.md
 `/gsd:plan-phase 2` directly) to start the import/call-graph resolution phase using the full GSD cycle.
-Resume file: .planning/phases/02-imports-resolution-call-graph/02-CONTEXT.md
+Resume file: None
