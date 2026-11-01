@@ -87,7 +87,13 @@ a negative fixture proves no false positives
   4. A negative fixture (unrelated change) produces no affected routes, proving the analysis does not invent
      false positives
   5. Each reported route-impact result includes the full chain of symbols connecting the change to the route
-**Plans**: TBD
+**Plans**: 4 plans (3 waves)
+
+Plans:
+- [ ] 03-01-PLAN.md — Wave 1: Route/impact contracts and Tree-sitter route syntax extraction
+- [ ] 03-02-PLAN.md — Wave 2: Verified FastAPI receivers, imported routers and literal mount prefixes
+- [ ] 03-03-PLAN.md — Wave 2: Deterministic bounded reverse-impact paths with source evidence
+- [ ] 03-04-PLAN.md — Wave 3: Public project API, exact positive/negative fixture tests and scope documentation
 
 ### Phase 4: PR ingestion & diff mapping
 **Goal**: GitHub REST client fetches PR metadata/diffs at pinned SHAs; diff lines map to symbols; `/api/analyses`

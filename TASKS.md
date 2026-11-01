@@ -83,10 +83,10 @@ Epic story: US-03 · GSD Phase 2 · Epic issue: https://github.com/esharif20/cod
 
 | ID | Title | Story | GSD Phase | Status | Acceptance criteria | Issue |
 | --- | --- | --- | --- | --- | --- | --- |
-| CS-020 | Sample FastAPI fixture repo | US-03 | 2 | **TODO** | See epic for full context | tracked in epic #8 |
-| CS-021 | Import/call-site extraction | US-03 | 2 | **TODO** | See epic for full context | tracked in epic #8 |
-| CS-022 | Resolver + explicit unresolved status | US-03 | 2 | **TODO** | See epic for full context | tracked in epic #8 |
-| CS-023 | NetworkX graph + reverse reachability | US-03 | 2 | **TODO** | See epic for full context | tracked in epic #8 |
+| CS-020 | Sample FastAPI fixture repo | US-03 | 2 | **DONE** | See epic for full context | tracked in epic #8 |
+| CS-021 | Import/call-site extraction | US-03 | 2 | **DONE** | See epic for full context | tracked in epic #8 |
+| CS-022 | Resolver + explicit unresolved status | US-03 | 2 | **DONE** | See epic for full context | tracked in epic #8 |
+| CS-023 | NetworkX graph + reverse reachability | US-03 | 2 | **DONE** | See epic for full context | tracked in epic #8 |
 
 ---
 
