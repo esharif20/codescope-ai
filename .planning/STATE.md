@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 02-05-PLAN.md
-last_updated: "2026-11-01T15:32:59.326Z"
+stopped_at: Completed 02-06-PLAN.md
+last_updated: "2026-11-01T15:39:15.757Z"
 last_activity: 2026-11-01
 progress:
   total_phases: 8
   completed_phases: 0
   total_plans: 9
-  completed_plans: 5
-  percent: 5
+  completed_plans: 6
+  percent: 67
 ---
 
 # Project State
@@ -27,7 +27,7 @@ analysis proves runtime behaviour or finds every dependency.
 ## Current Position
 
 Phase: 02 (imports-resolution-call-graph) — EXECUTING
-Plan: 6 of 9
+Plan: 7 of 9
 Status: Ready to execute
 Last activity: 2026-11-01
 CLI), 46/46 pytest green, ruff clean, isolation guard passing, console script (`codescope-parse`) working
@@ -41,7 +41,7 @@ confirmed the Backend CI workflow green end-to-end on GitHub: https://github.com
 exists for that action — fixed by pinning both actions to exact commit SHAs, which is also the correct
 best-practice over tags generally).
 
-Progress: [█░░░░░░░░░] 1/8 phases (12.5%)
+Progress: [███████░░░] 6/9 plans (66.7%)
 
 ## Performance Metrics
 
@@ -68,6 +68,7 @@ Progress: [█░░░░░░░░░] 1/8 phases (12.5%)
 | Phase 02 P03 | 1min | 2 tasks | 2 files |
 | Phase 02 P04 | 6min | 2 tasks | 2 files |
 | Phase 02 P05 | 14 min | 2 tasks | 2 files |
+| Phase 02 P06 | 6 min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -99,6 +100,7 @@ Recent decisions affecting current work:
 - [Phase 02]: 02-04: extract_raw_calls/extract_raw_class_bases implemented as two fully independent tree traversals in one file (not merged), matching the existing _walk_symbols/_collect_syntax_issues separate-pass precedent
 - [Phase 02]: 02-05: import resolution is a pure two-pass operation; direct/relative/external classification runs per file, while verified package re-exports and star expansion run over the full project binding map
 - [Phase 02]: 02-05: symbol-table membership is the sole source of truth for external modules; unresolvable external star imports remain explicit unresolved bindings
+- [Phase 02]: 02-06: Call resolution uses a deterministic iterative hierarchy walk and produces one resolved edge or explicit unresolved/uncertain record per call site.
 
 ### Pending Todos
 
@@ -110,7 +112,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-11-01T15:32:25Z
-Stopped at: Completed 02-05-PLAN.md
-Next: execute 02-06-PLAN.md (class hierarchy index and direct call resolver).
+Last session: 2026-11-01T15:39:15.753Z
+Stopped at: Completed 02-06-PLAN.md
+Next: execute 02-07-PLAN.md (NetworkX call graph builder + query API).
 Resume file: None

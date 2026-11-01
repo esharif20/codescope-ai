@@ -68,7 +68,7 @@ Plans:
 - [x] 02-03-PLAN.md — Wave 2: Raw import statement extraction (CS-021, import half)
 - [x] 02-04-PLAN.md — Wave 2: Raw call-site + class-base extraction (CS-021, call half)
 - [x] 02-05-PLAN.md — Wave 3: Import resolver -- direct/relative/external + re-export hop + star expansion (CS-022, import half)
-- [ ] 02-06-PLAN.md — Wave 4: Class hierarchy index + call resolver (CS-022, call half)
+- [x] 02-06-PLAN.md — Wave 4: Class hierarchy index + call resolver (CS-022, call half)
 - [ ] 02-07-PLAN.md — Wave 5: NetworkX call graph builder + query API (CS-023)
 - [ ] 02-08-PLAN.md — Wave 6: Multi-file orchestrator (build_project_graph) + codescope-graph CLI
 - [ ] 02-09-PLAN.md — Wave 7: Fixture integration tests verifying exact resolved/unresolved edges
@@ -173,7 +173,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Python symbol extraction | 0/TBD | Not started | - |
-| 2. Imports, resolution, call graph | 0/9 | Not started | - |
+| 2. Imports, resolution, call graph | 6/9 | In progress | - |
 | 3. FastAPI routes & impact paths | 0/TBD | Not started | - |
 | 4. PR ingestion & diff mapping | 0/TBD | Not started | - |
 | 5. Report JSON & evaluation | 0/TBD | Not started | - |
