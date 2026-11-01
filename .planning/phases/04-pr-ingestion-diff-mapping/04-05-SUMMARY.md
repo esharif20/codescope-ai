@@ -74,7 +74,7 @@ Resolved FastAPI **0.162.0**, Starlette **1.10.0**, AnyIO **4.16.0**, annotated-
 
 - `backend/app/api.py` — Admission/body boundary, health/submission/polling routes, HTTP status policy and sanitized exception handlers.
 - `backend/app/main.py` — Injectable app factory and default ASGI entry point.
-- `backend/tests/test_analysis_api.py` — 34 hermetic API cases with real local graph/mapping work, blocked concurrent polling, invalid inputs, authorization, cleanup, failures and redaction.
+- `backend/tests/test_analysis_api.py` — 36 hermetic API cases with real local graph/mapping work, blocked concurrent polling, invalid inputs, authorization, cleanup, failures and redaction.
 - `backend/pyproject.toml`, `backend/uv.lock`, `backend/requirements.txt`, `backend/requirements-dev.txt` — Approved core runtime and reproducible exports.
 - `backend/README.md` — Complete Phase 4 usage and operational limitations.
 
@@ -88,6 +88,7 @@ Resolved FastAPI **0.162.0**, Starlette **1.10.0**, AnyIO **4.16.0**, annotated-
 - Fresh runtime/dev exports compared against committed exports, ignoring generated command headers — **identical**.
 - `git diff --check` — **passed**.
 - Stub scan found no TODO/FIXME/placeholder or unwired implementation. Empty buffers and fake client objects are intentional middleware/test infrastructure.
+- Post-verification regression run: `uv run --no-sync python -m pytest tests/test_analysis_api.py -q` — **36 passed**; Ruff on both changed Python files — **passed**. The earlier 549-test full run predates the two new limit regressions; the parent orchestrator owns the final full-suite rerun.
 
 ## Decisions Made
 
@@ -95,7 +96,9 @@ Followed the planned synchronous same-process boundary. FastAPI uses its ordinar
 
 ## Deviations from Plan
 
-None in scope. The parent orchestrator owns shared STATE, ROADMAP, REQUIREMENTS and TASKS updates and their metadata commit; this executor leaves those shared trackers untouched as assigned. Local commits use the explicitly requested `--no-verify`; all stated checks ran separately.
+**[Rule 1 - Bug] Completed size/complexity HTTP mapping.** Independent phase verification found that `diff_limit_exceeded` and `mapping_limit_exceeded` fell through to 502. Both now return the planned 413. Two raw-ASGI regressions raise the actual typed pipeline errors, verify their complete terminal error envelopes, assert cleanup and confirm GET retains the same status with 200. No ingestion/library contract changed.
+
+The parent orchestrator owns shared STATE, ROADMAP, REQUIREMENTS and TASKS updates and their metadata commit; this executor leaves those shared trackers untouched as assigned. Local commits use the explicitly requested `--no-verify`; all stated checks ran separately.
 
 ## Issues Encountered
 

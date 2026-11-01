@@ -31,7 +31,13 @@ def http_status(code):
         return 404
     if code in {"analysis_busy", "analysis_id_conflict", "pr_changed"}:
         return 409
-    if code in {"resource_limit", "result_limit_exceeded", "request_body_too_large"}:
+    if code in {
+        "resource_limit",
+        "result_limit_exceeded",
+        "request_body_too_large",
+        "diff_limit_exceeded",
+        "mapping_limit_exceeded",
+    }:
         return 413
     return {
         "unauthorized": 401,

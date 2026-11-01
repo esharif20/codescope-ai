@@ -12,6 +12,7 @@ from app.ingestion import pipeline
 from app.ingestion.github import fail
 from app.ingestion.models import (
     ChangedFile,
+    IngestionError,
     PinnedPullRequest,
     PullRequestRef,
     SnapshotPair,
@@ -227,6 +228,28 @@ def test_terminal_http_mapping_and_polling(api, monkeypatch, code, expected):
     assert api[2] == [True]
     if code == "github_rate_limited":
         assert headers[b"retry-after"] == b"17"
+
+
+@pytest.mark.parametrize(
+    "code,message",
+    [
+        ("diff_limit_exceeded", "Source diff exceeds processing limits."),
+        ("mapping_limit_exceeded", "Changed source exceeds mapping limits."),
+    ],
+)
+def test_mapping_limits_return_413_and_preserve_terminal_status(api, monkeypatch, code, message):
+    def fail_mapping(*args, **kwargs):
+        raise IngestionError(code, message, 422)
+
+    monkeypatch.setattr(pipeline, "map_snapshot_changes", fail_mapping)
+    identity = uuid4()
+    status, data, _ = call(api[0], method="POST", path="/api/analyses", body=payload(identity))
+    assert status == 413
+    assert data["state"] == "error" and data["stage"] == "finished"
+    assert data["summary"] is None
+    assert data["error"] == {"code": code, "message": message, "retry_after_seconds": None}
+    assert call(api[0], path=f"/api/analyses/{identity}")[0:2] == (200, data)
+    assert api[2] == [True]
 
 
 def test_unexpected_error_redacted(api, monkeypatch):
