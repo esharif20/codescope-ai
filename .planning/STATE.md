@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 02-04-PLAN.md
-last_updated: "2026-11-01T15:02:42.041Z"
+stopped_at: Completed 02-05-PLAN.md
+last_updated: "2026-11-01T15:32:59.326Z"
 last_activity: 2026-11-01
 progress:
   total_phases: 8
   completed_phases: 0
   total_plans: 9
-  completed_plans: 4
+  completed_plans: 5
   percent: 5
 ---
 
@@ -27,7 +27,7 @@ analysis proves runtime behaviour or finds every dependency.
 ## Current Position
 
 Phase: 02 (imports-resolution-call-graph) — EXECUTING
-Plan: 5 of 9
+Plan: 6 of 9
 Status: Ready to execute
 Last activity: 2026-11-01
 CLI), 46/46 pytest green, ruff clean, isolation guard passing, console script (`codescope-parse`) working
@@ -67,6 +67,7 @@ Progress: [█░░░░░░░░░] 1/8 phases (12.5%)
 | Phase 02 P02 | 3min | 2 tasks | 10 files |
 | Phase 02 P03 | 1min | 2 tasks | 2 files |
 | Phase 02 P04 | 6min | 2 tasks | 2 files |
+| Phase 02 P05 | 14 min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -96,6 +97,8 @@ Recent decisions affecting current work:
 - [Phase 02]: Confirmed tree-sitter-python import-statement grammar shapes empirically before implementation (no re-derivation from memory) -- all 9 cited statement shapes matched the plan's interfaces block exactly
 - [Phase 02]: 02-04: calls.py reuses python_symbols.py's private _Frame/_qualified_name/_node_name helpers directly rather than reimplementing scope-stack logic, establishing the cross-module reuse pattern for Plan 05/06 resolvers
 - [Phase 02]: 02-04: extract_raw_calls/extract_raw_class_bases implemented as two fully independent tree traversals in one file (not merged), matching the existing _walk_symbols/_collect_syntax_issues separate-pass precedent
+- [Phase 02]: 02-05: import resolution is a pure two-pass operation; direct/relative/external classification runs per file, while verified package re-exports and star expansion run over the full project binding map
+- [Phase 02]: 02-05: symbol-table membership is the sole source of truth for external modules; unresolvable external star imports remain explicit unresolved bindings
 
 ### Pending Todos
 
@@ -107,7 +110,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-11-01T15:02:42.038Z
-Stopped at: Completed 02-04-PLAN.md
-`/gsd:plan-phase 2` directly) to start the import/call-graph resolution phase using the full GSD cycle.
+Last session: 2026-11-01T15:32:25Z
+Stopped at: Completed 02-05-PLAN.md
+Next: execute 02-06-PLAN.md (class hierarchy index and direct call resolver).
 Resume file: None
