@@ -21,9 +21,9 @@ tested.
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Python symbol extraction** - Tree-sitter extractor returns structured symbol data, independent of FastAPI
+- [x] **Phase 1: Python symbol extraction** - Tree-sitter extractor returns structured symbol data, independent of FastAPI (completed 2026-11-01)
 - [x] **Phase 2: Imports, resolution, call graph** - Resolve imports/direct calls into a NetworkX call graph with explicit unresolved edges (completed 2026-11-01)
-- [ ] **Phase 3: FastAPI routes & impact paths** - Detect FastAPI routes and trace reverse-dependency paths from changes to routes
+- [x] **Phase 3: FastAPI routes & impact paths** - Detect FastAPI routes and trace reverse-dependency paths from changes to routes (completed 2026-11-01)
 - [ ] **Phase 4: PR ingestion & diff mapping** - Fetch real PRs at pinned SHAs, map diffs to symbols, expose status/progress via the API
 - [ ] **Phase 5: Report JSON & evaluation** - Build structured report JSON and evaluate it against hand-labelled fixtures, before Gemini
 - [ ] **Phase 6: RAG & Gemini summary** - Bounded, cited Gemini impact explanation over untrusted repository evidence
@@ -91,9 +91,9 @@ a negative fixture proves no false positives
 
 Plans:
 - [x] 03-01-PLAN.md — Wave 1: Route/impact contracts and Tree-sitter route syntax extraction
-- [ ] 03-02-PLAN.md — Wave 2: Verified FastAPI receivers, imported routers and literal mount prefixes
-- [ ] 03-03-PLAN.md — Wave 2: Deterministic bounded reverse-impact paths with source evidence
-- [ ] 03-04-PLAN.md — Wave 3: Public project API, exact positive/negative fixture tests and scope documentation
+- [x] 03-02-PLAN.md — Wave 2: Verified FastAPI receivers, imported routers and literal mount prefixes
+- [x] 03-03-PLAN.md — Wave 2: Deterministic bounded reverse-impact paths with source evidence
+- [x] 03-04-PLAN.md — Wave 3: Public project API, exact positive/negative fixture tests and scope documentation
 
 ### Phase 4: PR ingestion & diff mapping
 **Goal**: GitHub REST client fetches PR metadata/diffs at pinned SHAs; diff lines map to symbols; `/api/analyses`
@@ -178,9 +178,9 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Python symbol extraction | 0/TBD | Not started | - |
-| 2. Imports, resolution, call graph | 6/9 | In progress | - |
-| 3. FastAPI routes & impact paths | 0/TBD | Not started | - |
+| 1. Python symbol extraction | Pre-GSD | Complete | 2026-11-01 |
+| 2. Imports, resolution, call graph | 9/9 | Complete | 2026-11-01 |
+| 3. FastAPI routes & impact paths | 4/4 | Complete | 2026-11-01 |
 | 4. PR ingestion & diff mapping | 0/TBD | Not started | - |
 | 5. Report JSON & evaluation | 0/TBD | Not started | - |
 | 6. RAG & Gemini summary | 0/TBD | Not started | - |

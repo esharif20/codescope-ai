@@ -24,7 +24,7 @@ key-decisions:
   - "Raw receiver constructor text remains unverified until import and registration resolution."
 patterns-established:
   - "Eligible imports are parsed from individual direct-root nodes and retain original source locations."
-requirements-completed: [US-04]
+requirements-completed: []
 duration: 6min
 completed: 2026-11-01
 ---
@@ -86,7 +86,7 @@ None.
 
 ## Next Phase Readiness
 
-Plan 02 can consume `RouteSyntax` for registration verification; Plan 03 can consume the evidence models for impact traversal. US-04 requires those later plans and the integrated CLI before the user story is fully delivered.
+Plan 02 can consume `RouteSyntax` for registration verification; Plan 03 can consume the evidence models for impact traversal. US-04 requires those later plans and the integrated library API before the user story is fully delivered.
 
 ## Self-Check: PASSED
 

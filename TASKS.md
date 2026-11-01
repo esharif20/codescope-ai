@@ -96,9 +96,9 @@ Epic story: US-04 · GSD Phase 3 · Epic issue: https://github.com/esharif20/cod
 
 | ID | Title | Story | GSD Phase | Status | Acceptance criteria | Issue |
 | --- | --- | --- | --- | --- | --- | --- |
-| CS-030 | Route declaration detection | US-04 | 3 | **TODO** | See epic for full context | tracked in epic #9 |
-| CS-031 | Changed-symbol → route tracing | US-04 | 3 | **TODO** | See epic for full context | tracked in epic #9 |
-| CS-032 | Negative fixture (no false routes) | US-04 | 3 | **TODO** | See epic for full context | tracked in epic #9 |
+| CS-030 | Route declaration detection | US-04 | 3 | **DONE** | See epic for full context | tracked in epic #9 |
+| CS-031 | Changed-symbol → route tracing | US-04 | 3 | **DONE** | See epic for full context | tracked in epic #9 |
+| CS-032 | Negative fixture (no false routes) | US-04 | 3 | **DONE** | See epic for full context | tracked in epic #9 |
 
 ---
 

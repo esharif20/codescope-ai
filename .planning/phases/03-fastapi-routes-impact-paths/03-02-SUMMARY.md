@@ -65,7 +65,7 @@ Only structurally eligible imports establish proof. Unknown wildcard exports can
 
 ## Deviations from Plan
 
-None in feature scope. Used `uv run --no-sync` and local `--no-verify` commits as directed by the coordinator. Shared STATE.md, ROADMAP.md and REQUIREMENTS.md updates are delegated to the coordinator to avoid concurrent writes. US-04 remains incomplete until the integrated CLI plan completes.
+None in feature scope. Used `uv run --no-sync` and local `--no-verify` commits as directed by the coordinator. Shared STATE.md, ROADMAP.md and REQUIREMENTS.md updates are delegated to the coordinator to avoid concurrent writes. US-04 remains incomplete until the integrated library API plan completes.
 
 ## Verification
 
