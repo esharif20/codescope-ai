@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
-from app.analysis.import_resolver import resolve_file_imports
+from app.analysis.import_resolver import (
+    extract_dunder_all,
+    resolve_file_imports,
+    resolve_reexports_and_stars,
+)
 from app.analysis.imports import RawImport
-from app.analysis.models import ResolutionStatus, Symbol, SymbolKind
+from app.analysis.models import ImportBinding, ResolutionStatus, Symbol, SymbolKind
 
 
 def _symbol(name: str, module_path: str) -> Symbol:
@@ -133,3 +137,118 @@ def test_keeps_relative_star_import_unresolved_for_expansion_pass() -> None:
     assert result[0].status == ResolutionStatus.UNRESOLVED
     assert result[0].source_module == "services"
     assert result[0].source_name is None
+
+
+def test_extract_dunder_all_from_literal_top_level_list() -> None:
+    assert extract_dunder_all(
+        '__all__ = ["AuthService", "get_current_user"]\n',
+        "services/__init__.py",
+    ) == ["AuthService", "get_current_user"]
+
+
+def test_extract_dunder_all_rejects_computed_or_missing_values() -> None:
+    assert extract_dunder_all('__all__ = sorted(["b", "a"])\n', "x.py") is None
+    assert extract_dunder_all("x = 1\n", "x.py") is None
+
+
+def test_resolves_one_hop_package_reexport() -> None:
+    bindings = {
+        "services": [
+            ImportBinding(
+                imported_name="auth",
+                source_module="app.services",
+                source_name="auth",
+                status=ResolutionStatus.UNRESOLVED,
+                file_path="services.py",
+                line=1,
+            )
+        ],
+        "app.services": [
+            ImportBinding(
+                imported_name="auth",
+                source_module="app.services.auth",
+                source_name="auth",
+                status=ResolutionStatus.RESOLVED,
+                file_path="app/services/__init__.py",
+                line=1,
+            )
+        ],
+    }
+
+    result = resolve_reexports_and_stars(bindings, {}, {})
+
+    assert result["services"][0].status == ResolutionStatus.RESOLVED
+    assert result["services"][0].source_module == "app.services.auth"
+    assert result["services"][0].source_name == "auth"
+    assert bindings["services"][0].status == ResolutionStatus.UNRESOLVED
+
+
+def test_expands_in_repo_star_import_using_literal_dunder_all() -> None:
+    bindings = {"routes": [_star_binding("services")]}
+    symbols = {
+        "services": [
+            _symbol("AuthService", "services"),
+            _symbol("get_current_user", "services"),
+        ]
+    }
+
+    result = resolve_reexports_and_stars(
+        bindings,
+        symbols,
+        {"services": ["AuthService", "get_current_user"]},
+    )
+
+    resolved_bindings = [
+        (binding.imported_name, binding.source_name, binding.status)
+        for binding in result["routes"]
+    ]
+    assert resolved_bindings == [
+        ("AuthService", "AuthService", ResolutionStatus.RESOLVED),
+        ("get_current_user", "get_current_user", ResolutionStatus.RESOLVED),
+    ]
+
+
+def test_expands_in_repo_star_import_to_top_level_symbols_without_dunder_all() -> None:
+    bindings = {"routes": [_star_binding("services")]}
+    symbols = {
+        "services": [
+            _symbol("AuthService", "services"),
+            _symbol("get_current_user", "services"),
+            Symbol(
+                name="inner",
+                qualified_name="outer.<locals>.inner",
+                kind=SymbolKind.NESTED_FUNCTION,
+                file_path="services.py",
+                module_path="services",
+                start_line=2,
+                end_line=2,
+                parent_qualified_name="outer",
+            ),
+        ]
+    }
+
+    result = resolve_reexports_and_stars(bindings, symbols, {"services": None})
+
+    assert [binding.imported_name for binding in result["routes"]] == [
+        "AuthService",
+        "get_current_user",
+    ]
+
+
+def test_leaves_external_star_import_unresolved() -> None:
+    star = _star_binding("external_package")
+
+    result = resolve_reexports_and_stars({"main": [star]}, {}, {})
+
+    assert result == {"main": [star]}
+
+
+def _star_binding(source_module: str) -> ImportBinding:
+    return ImportBinding(
+        imported_name="*",
+        source_module=source_module,
+        source_name=None,
+        status=ResolutionStatus.UNRESOLVED,
+        file_path="routes/__init__.py",
+        line=1,
+    )
