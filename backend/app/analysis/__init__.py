@@ -19,6 +19,8 @@ from app.analysis.python_symbols import extract_symbols, extract_symbols_from_fi
 # ruff: noqa: I001
 from app.analysis.call_graph import CallGraph, callees_of, callers_of, reverse_reachable_from
 from app.analysis.project_graph import ProjectGraph, build_project_graph
+from app.analysis.route_models import RouteRegistration, RouteInventory, ImpactPath, ImpactResult
+from app.analysis.project_routes import ProjectImpactAnalysis, analyze_route_impacts
 
 __all__ = [
     "extract_symbols",
@@ -35,4 +37,10 @@ __all__ = [
     "callers_of",
     "callees_of",
     "reverse_reachable_from",
+    "RouteRegistration",
+    "RouteInventory",
+    "ImpactPath",
+    "ImpactResult",
+    "ProjectImpactAnalysis",
+    "analyze_route_impacts",
 ]
