@@ -62,46 +62,58 @@ def test_receiver_unproven_or_shadowed(source):
 def test_receiver_router_declaration_stays_local():
     result = inventory(
         {
-            "routes": 'from fastapi import APIRouter as Router\nr = Router()\n@r.get("/x")\ndef x(): pass\n'
+            "routes": "from fastapi import APIRouter as Router\n"
+            'r = Router()\n@r.get("/x")\ndef x(): pass\n'
         }
     )
     assert result.registrations == []
     assert len(result.declarations) == 1
 
 
-ROUTES = '''from fastapi import APIRouter
+ROUTES = """from fastapi import APIRouter
 router = APIRouter(prefix="/v1")
 @router.get("/users/")
 def users(): pass
-'''
+"""
 
 
-@pytest.mark.parametrize('module,imports,child,inits', [
-    ('main', 'from routes import router as users', 'users', set()),
-    ('main', 'import routes as users', 'users.router', set()),
-    ('pkg.main', 'from .routes import router as users', 'users', set()),
-    ('pkg', 'from .routes import router as users', 'users', {'pkg'}),
-    ('pkg.main', 'from . import routes as users', 'users.router', set()),
-    ('main', 'import pkg.routes as users', 'users.router', set()),
-    ('main', 'import pkg.routes', 'pkg.routes.router', set()),
-])
+@pytest.mark.parametrize(
+    "module,imports,child,inits",
+    [
+        ("main", "from routes import router as users", "users", set()),
+        ("main", "import routes as users", "users.router", set()),
+        ("pkg.main", "from .routes import router as users", "users", set()),
+        ("pkg", "from .routes import router as users", "users", {"pkg"}),
+        ("pkg.main", "from . import routes as users", "users.router", set()),
+        ("main", "import pkg.routes as users", "users.router", set()),
+        ("main", "import pkg.routes", "pkg.routes.router", set()),
+    ],
+)
 def test_includes_import_forms(module, imports, child, inits):
-    target = 'pkg.routes' if module.startswith('pkg') or 'pkg.routes' in imports else 'routes'
-    result = inventory({module: f'''from fastapi import FastAPI
+    target = "pkg.routes" if module.startswith("pkg") or "pkg.routes" in imports else "routes"
+    result = inventory(
+        {
+            module: f"""from fastapi import FastAPI
 {imports}
 app = FastAPI()
 app.include_router({child}, prefix="/api")
-''', target: ROUTES}, inits)
-    assert [r.path for r in result.registrations] == ['/api/v1/users/']
+""",
+            target: ROUTES,
+        },
+        inits,
+    )
+    assert [r.path for r in result.registrations] == ["/api/v1/users/"]
     assert [(e.file_path, e.line) for e in result.registrations[0].registration_evidence] == [
-        (module.replace('.', '/') + '.py', 3),
-        (module.replace('.', '/') + '.py', 4),
-        (target.replace('.', '/') + '.py', 2),
+        (module.replace(".", "/") + ".py", 3),
+        (module.replace(".", "/") + ".py", 4),
+        (target.replace(".", "/") + ".py", 2),
     ]
 
 
 def test_nested_multiple_mounts_cycle_and_disconnected():
-    result = inventory({'main': '''from fastapi import FastAPI, APIRouter
+    result = inventory(
+        {
+            "main": """from fastapi import FastAPI, APIRouter
 app = FastAPI()
 outer = APIRouter(prefix="/outer")
 inner = APIRouter(prefix="/inner")
@@ -114,60 +126,85 @@ inner.include_router(outer)
 def x(): pass
 @lost.get("/lost")
 def lost_handler(): pass
-'''})
+"""
+        }
+    )
     assert [r.path for r in result.registrations] == [
-        '/a/outer/middle/inner/x/', '/b/outer/middle/inner/x/']
-    assert any('cycle' in d.reason for d in result.diagnostics)
+        "/a/outer/middle/inner/x/",
+        "/b/outer/middle/inner/x/",
+    ]
+    assert any("cycle" in d.reason for d in result.diagnostics)
     assert len(result.declarations) == 2
 
 
-@pytest.mark.parametrize('imports,child', [
-    ('from routes import router\nrouter = fake', 'router'),
-    ('import routes as r\nr = fake', 'r.router'),
-    ('import routes as r\nif False:\n    r = fake', 'r.router'),
-    ('if False:\n    from routes import router', 'router'),
-    ('def setup():\n    import routes as r', 'r.router'),
-    ('def setup():\n    from routes import router', 'router'),
-    ('from routes import *', 'router'),
-    ('from bridge import router', 'router'),
-    ('import routes as r\nimport routes as r', 'r.router'),
-])
+@pytest.mark.parametrize(
+    "imports,child",
+    [
+        ("from routes import router\nrouter = fake", "router"),
+        ("import routes as r\nr = fake", "r.router"),
+        ("import routes as r\nif False:\n    r = fake", "r.router"),
+        ("if False:\n    from routes import router", "router"),
+        ("def setup():\n    import routes as r", "r.router"),
+        ("def setup():\n    from routes import router", "router"),
+        ("from routes import *", "router"),
+        ("from bridge import router", "router"),
+        ("import routes as r\nimport routes as r", "r.router"),
+    ],
+)
 def test_include_scope_safety(imports, child):
-    result = inventory({'main': f'''from fastapi import FastAPI
+    result = inventory(
+        {
+            "main": f"""from fastapi import FastAPI
 {imports}
 app = FastAPI()
 app.include_router({child})
-''', 'routes': ROUTES, 'bridge': 'from routes import router\n'})
+""",
+            "routes": ROUTES,
+            "bridge": "from routes import router\n",
+        }
+    )
     assert result.registrations == []
     assert result.diagnostics
     assert all(d.file_path and d.line > 0 for d in result.diagnostics)
-    if '= fake' in imports or imports.count('import routes') > 1:
-        assert any('shadow' in d.reason for d in result.diagnostics)
+    if "= fake" in imports or imports.count("import routes") > 1:
+        assert any("shadow" in d.reason for d in result.diagnostics)
 
 
-@pytest.mark.parametrize('constructor,include', [
-    ('APIRouter(**config)', 'app.include_router(router)'),
-    ('APIRouter()', 'app.include_router(router, **options)'),
-])
+@pytest.mark.parametrize(
+    "constructor,include",
+    [
+        ("APIRouter(**config)", "app.include_router(router)"),
+        ("APIRouter()", "app.include_router(router, **options)"),
+    ],
+)
 def test_include_argument_unpacking_preserved(constructor, include):
-    result = inventory({'main': f'''from fastapi import FastAPI, APIRouter
+    result = inventory(
+        {
+            "main": f"""from fastapi import FastAPI, APIRouter
 app = FastAPI()
 router = {constructor}
 {include}
 @router.get("/x")
 def x(): pass
-'''})
+"""
+        }
+    )
     assert result.registrations == []
-    assert any(d.reason == 'argument_unpacking_unsupported' for d in result.diagnostics)
+    assert any(d.reason == "argument_unpacking_unsupported" for d in result.diagnostics)
 
 
-@pytest.mark.parametrize('prefix', ['PREFIX', '"bad"', '"/bad/"', '"/"'])
+@pytest.mark.parametrize("prefix", ["PREFIX", '"bad"', '"/bad/"', '"/"'])
 def test_include_invalid_prefix(prefix):
-    result = inventory({'main': f'''from fastapi import FastAPI
+    result = inventory(
+        {
+            "main": f"""from fastapi import FastAPI
 from routes import router
 app = FastAPI()
 app.include_router(router, prefix={prefix})
-''', 'routes': ROUTES})
+""",
+            "routes": ROUTES,
+        }
+    )
     assert result.registrations == []
     assert result.diagnostics
 
@@ -175,19 +212,78 @@ app.include_router(router, prefix={prefix})
 def test_include_caps_and_determinism(monkeypatch):
     from app.analysis import route_resolver
 
-    sources = {'main': '''from fastapi import FastAPI
+    sources = {
+        "main": """from fastapi import FastAPI
 from routes import router
 app = FastAPI()
 app.include_router(router, prefix="/a")
 app.include_router(router, prefix="/b")
-''', 'routes': ROUTES}
+""",
+        "routes": ROUTES,
+    }
     baseline = inventory(sources)
     assert baseline.model_dump() == inventory(dict(reversed(list(sources.items())))).model_dump()
     assert not baseline.truncated
-    monkeypatch.setattr(route_resolver, '_MAX_REGISTRATIONS', 1)
+    monkeypatch.setattr(route_resolver, "_MAX_REGISTRATIONS", 1)
     capped = inventory(sources)
     assert len(capped.registrations) == 1
     assert capped.truncated
-    assert any('cap' in d.reason for d in capped.diagnostics)
-    monkeypatch.setattr(route_resolver, '_MAX_MOUNT_STEPS', 1)
+    assert any("cap" in d.reason for d in capped.diagnostics)
+    monkeypatch.setattr(route_resolver, "_MAX_MOUNT_STEPS", 1)
     assert inventory(sources).truncated
+
+
+def test_exact_cap_does_not_claim_truncation(monkeypatch):
+    from app.analysis import route_resolver
+
+    monkeypatch.setattr(route_resolver, "_MAX_REGISTRATIONS", 1)
+    result = inventory(
+        {
+            "main": "from fastapi import FastAPI\napp = FastAPI()\n"
+            '@app.get("/one")\ndef one(): pass\n'
+        }
+    )
+    assert len(result.registrations) == 1
+    assert not result.truncated
+
+
+def test_include_alias_checked_when_receiver_unverified():
+    result = inventory(
+        {"main": "import routes as r\nr = fake\napp.include_router(r.router)\n", "routes": ROUTES}
+    )
+    assert result.registrations == []
+    assert any(d.reason == "include_alias_shadowed" for d in result.diagnostics)
+
+
+def test_include_repeated_same_path_preserves_distinct_mount_evidence():
+    result = inventory(
+        {
+            "main": "from fastapi import FastAPI\nfrom routes import router\n"
+            "app = FastAPI()\napp.include_router(router)\n"
+            "app.include_router(router)\n",
+            "routes": ROUTES,
+        }
+    )
+    assert len(result.registrations) == 2
+    assert [r.path for r in result.registrations] == ["/v1/users/", "/v1/users/"]
+    assert {r.registration_evidence[1].line for r in result.registrations} == {4, 5}
+
+
+def test_receiver_module_alias_router_and_invalid_prefix():
+    good = inventory(
+        {
+            "routes": "import fastapi as fa\nrouter = fa.APIRouter()\n"
+            '@router.get("/x")\ndef x(): pass\n'
+        }
+    )
+    assert len(good.declarations) == 1
+    assert not good.diagnostics
+    bad = inventory(
+        {
+            "main": "from fastapi import APIRouter\n"
+            'router = APIRouter(prefix="bad")\n'
+            '@router.get("/x")\ndef x(): pass\n'
+        }
+    )
+    assert bad.registrations == []
+    assert any(d.reason == "receiver_prefix_unsupported" for d in bad.diagnostics)
