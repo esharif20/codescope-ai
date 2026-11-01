@@ -28,11 +28,13 @@ runtime behaviour or finds every dependency.
 - ✓ US-12: See meaningful progress, timeout and error states — validated in Phase 4
   (concurrent UUID polling, cooperative deadlines, safe failures and cleanup; 554 backend tests)
 
+- ✓ US-11: View precomputed demo reports without signing in — validated in Phase 5
+  (public frozen-report APIs, controlled provenance, independent evaluation; 665 tests, 15/15 must-haves)
+
 ### Active
 
 - [ ] US-05: Read a concise AI impact explanation grounded in source evidence
 - [ ] US-08: Explore an interactive dependency graph and selected paths
-- [ ] US-11: View precomputed demo reports without signing in
 - [ ] US-13: Keep live analyses restricted and bounded to prevent abuse and costs
 
 ### Out of Scope
@@ -99,6 +101,7 @@ runtime behaviour or finds every dependency.
 | Phase 3 verifies static FastAPI registration and returns canonical shortest supported impact chains with explicit bounds | Evidence includes constructor/include/decorator locations and call-site lines; unresolved calls never become paths | ✓ Good — validated by 12/12 phase must-haves; conservative partial diagnostics documented |
 | Phase 4 uses immutable merge-base/head snapshots and same-process synchronous API with concurrent UUID polling | Keeps revision evidence separate, cleanup owned and status observable without workers | ✓ Good — 18/18 must-haves, 554 tests, live API run and user source-opening check passed |
 | Add core FastAPI and required transitives after explicit approval | Implements the chosen API boundary without optional server/test-client extras | ✓ Good — lockfile and both requirements exports synchronized |
+| Phase 5 keeps verified evidence separate from uncertainties and publishes reports after cleanup | Canonical JSON, pinned live sources, controlled demo manifests and independent truth preserve inspectability | ✓ Good — 15/15 must-haves; measured misses remain visible |
 
 ## Evolution
 
@@ -118,4 +121,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-11-01 after Phase 4 completion and user source-opening confirmation*
+*Last updated: 2026-11-01 after Phase 5 completion and independent verification*

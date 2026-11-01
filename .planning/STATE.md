@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: planned
-stopped_at: Phase 05 planned and independently checked; ready for execution
-last_updated: "2026-11-01T17:12:18.220Z"
+status: ready_to_plan
+stopped_at: Phase 5 complete and independently verified; ready to plan Phase 6
+last_updated: "2026-11-01T17:46:47.573Z"
 last_activity: 2026-11-01
 progress:
   total_phases: 8
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 23
-  completed_plans: 18
-  percent: 78
+  completed_plans: 23
+  percent: 100
 ---
 
 # Project State
@@ -22,56 +22,41 @@ See: .planning/PROJECT.md (updated 2026-11-01)
 
 **Core value:** Show what a PR might affect, why, and the exact code supporting each finding — never claim static
 analysis proves runtime behaviour or finds every dependency.
-**Current focus:** Phase 05 — report JSON & evaluation (planned)
+**Current focus:** Phase 6 — RAG & Gemini summary (not planned)
 
 ## Current Position
 
-Phase: 5
-Plan: 0 of 5
-Status: Phase 5 planned — five plans passed independent checking
+Phase: 6
+Plan: Not started
+Status: Phase 5 complete — ready to plan Phase 6
 Last activity: 2026-11-01
 
-Phase 3 delivered static route registration, bounded canonical reverse-impact paths and the public
-`analyze_route_impacts` library API. All 246 backend tests and Ruff pass; independent verification passed
-12/12 must-haves. Exact positive fixture reaches two routes; both unrelated changes reach none.
-The fixture remains conservatively partial because generic constructor assignments also carry diagnostics.
-Phase 3 is pushed through `4cbde74`; Backend CI passed all 246 tests and Ruff:
+Phase 5 delivered schema-v1 evidence reports, atomic bounded retention, independently labelled evaluation,
+two frozen controlled demos, protected live report retrieval and public demo APIs. All five plans completed
+across four waves; retention/evaluation ran in parallel. Independent verification passed 15/15 must-haves
+and all four roadmap criteria; no human checks remain. Full backend verification: 665 tests, Ruff,
+uv lock --check, frozen demo drift and diff checks passed. No dependencies were added.
+
+Five controlled cases, each scored separately at base/head, measured micro call-edge TP/FP/FN=72/0/12
+(precision 1, recall 6/7) and endpoint TP/FP/FN=6/0/2 (precision 1, recall .75). Source-known receiver
+relationships and the missed audit endpoint remain false negatives. The unrelated-callers demo has zero
+verified affected routes. These are controlled hypothetical seeds, not real PR diffs or general guarantees.
+Reports preserve uncertainties separately from verified paths and controlled SHA256 manifests without
+invented GitHub links. Reports/status expire together (default 1 hour, 20 terminal records, 2 MiB/report).
+
+Progress: 5/8 phases complete; 23/23 currently planned GSD plans complete (Phase 1 predates GSD plans).
+Phase 6 has not been planned or started; automatic advance is disabled.
+
+Phase 4 is fully accepted: 18/18 must-haves, live GitHub/API check and user-confirmed source highlighting.
+Its FastAPI dependency approval remains recorded. Latest pushed code CI is Phase 3 at 4cbde74:
 https://github.com/esharif20/codescope-ai/actions/runs/41326179064
-
-Progress: 4/8 phases complete; 18/23 currently planned GSD plans complete (Phase 1 predates GSD plans).
-
-Phase 5 is planned as five plans across four waves: report contracts/assembly; atomic retention and
-independent evaluation in parallel; frozen demos; protected live and public demo report APIs.
-All five plans passed structural validation and independent checking. Research remains disabled.
-Proposals include schema v1, a shared canonical JSON byte format, bounded report retention and separate
-public demo endpoints. Controlled scenarios use local fixture locations and SHA256 manifests, without
-invented GitHub links. Evaluation preserves known missing edges and endpoint impacts as false negatives;
-the negative demo uses the genuinely unrelated callers case. No new dependencies are planned.
-
-All five Phase 4 plans delivered validated PR admission, complete immutable snapshots, both-revision symbol
-mapping/source links, an exclusive observable pipeline, and the FastAPI health/analyses API. Latest backend
-verification: 554 tests passed; Ruff, lock and diff checks passed. Independent verification confirms 18/18
-must-haves. Real GitHub PR 1440 completed through the actual ASGI API (201, 53 requests, 18.2 seconds), with
-concurrent progress/health, matching final GET and a pinned source URL returning 200. No repository source
-was executed. Status is process-local, deadlines cooperative, and unsupported analysis remains partial.
-Phase 4 changes are local. Core FastAPI and required transitives were explicitly approved and installed.
-
-The user confirmed the linked source lines are highlighted. Verification status is passed, and
-04-HUMAN-UAT.md is complete with no pending items. Phase 4 is fully accepted.
-
-Checkpoint resolved: user explicitly approved adding FastAPI and finishing Phase 4. Approval covers core
-FastAPI and required transitives, with no standard/server/test-client extras.
-
-Phase 4 has five plans across four waves. Plans 04-02 (snapshots) and 04-03 (mapping) can run in parallel.
-Proposed defaults: merge-base/head comparison retaining target base separately, synchronous UUID-addressed
-polling and cooperative timeout with bounded in-memory status retention. Plan 04-05 begins with explicit
-approval for core FastAPI and required transitives before dependency changes; no dependencies were added while planning.
+Remote documentation is through 077096a; Phase 4/5 implementation remains local and has no remote CI run.
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 0
+- Total plans completed: 23
 - Average duration: - min
 - Total execution time: 0 hours
 
@@ -105,6 +90,7 @@ approval for core FastAPI and required transitives before dependency changes; no
 | Phase 04 P03 | 4min | 2 tasks | 4 files |
 | Phase 04 P04 | 4min | 2 tasks | 6 files |
 | Phase 04 P05 | 5min | 3 tasks | 8 files |
+| Phase 05 | Four waves | 10 tasks | 5 plans |
 
 ## Accumulated Context
 
@@ -149,6 +135,10 @@ Recent decisions affecting current work:
 - [Phase 04]: User approved core FastAPI and required transitives; dependency lock and exports are synchronized.
 - [Phase 04]: User confirmed pinned-source highlighting; 18/18 must-haves, 554 tests and live API verification passed.
 
+- [Phase 05]: Canonical UTF-8 JSON includes one final newline in byte limits and artifact hashes.
+- [Phase 05]: Publish status/report atomically after source cleanup; controlled demos never invoke live analysis.
+- [Phase 05]: Independent gold retains source-known unsupported relationships as false negatives.
+
 ### Pending Todos
 
 None.
@@ -159,7 +149,7 @@ The fixture returns partial=True because ordinary constructor assignments also t
 
 ## Session Continuity
 
-Last session: 2026-11-01T17:12:18Z
-Stopped at: Phase 5 planned; five plans passed independent checking with no remaining issues.
-Next: execute Phase 5 — 05-01, then 05-02/05-03 in parallel, then 05-04 and 05-05.
+Last session: 2026-11-01T17:47:15Z
+Stopped at: Phase 5 complete; 15/15 must-haves and four roadmap criteria verified.
+Next: $gsd-plan-phase 6. No pending approval or human verification for Phase 5.
 Resume file: None

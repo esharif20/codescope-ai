@@ -25,7 +25,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Imports, resolution, call graph** - Resolve imports/direct calls into a NetworkX call graph with explicit unresolved edges (completed 2026-11-01)
 - [x] **Phase 3: FastAPI routes & impact paths** - Detect FastAPI routes and trace reverse-dependency paths from changes to routes (completed 2026-11-01)
 - [x] **Phase 4: PR ingestion & diff mapping** - Fetch real PRs at pinned SHAs, map diffs to symbols, expose status/progress via the API (completed 2026-11-01)
-- [ ] **Phase 5: Report JSON & evaluation** - Build structured report JSON and evaluate it against hand-labelled fixtures, before Gemini
+- [x] **Phase 5: Report JSON & evaluation** - Build structured report JSON and evaluate it against hand-labelled fixtures, before Gemini (completed 2026-11-01)
 - [ ] **Phase 6: RAG & Gemini summary** - Bounded, cited Gemini impact explanation over untrusted repository evidence
 - [ ] **Phase 7: Frontend** - React/Vite/Tailwind/shadcn app with an interactive React Flow dependency graph
 - [ ] **Phase 8: Deployment, limits, caching** - Restricted Cloud Run deployment with abuse/cost limits and caching
@@ -134,11 +134,11 @@ against hand-labelled fixtures
 **Plans**: 5 plans (4 waves)
 
 Plans:
-- [ ] 05-01-PLAN.md — Wave 1: Report/provenance contracts and deterministic evidence assembly
-- [ ] 05-02-PLAN.md — Wave 2: Atomic bounded report retention and cleanup-safe publication
-- [ ] 05-03-PLAN.md — Wave 2: Independent hand-labelled call-edge and endpoint-impact evaluation
-- [ ] 05-04-PLAN.md — Wave 3: Frozen controlled demo reports and allowlisted offline loader
-- [ ] 05-05-PLAN.md — Wave 4: Protected live report API, public demo API and complete backend verification
+- [x] 05-01-PLAN.md — Wave 1: Report/provenance contracts and deterministic evidence assembly
+- [x] 05-02-PLAN.md — Wave 2: Atomic bounded report retention and cleanup-safe publication
+- [x] 05-03-PLAN.md — Wave 2: Independent hand-labelled call-edge and endpoint-impact evaluation
+- [x] 05-04-PLAN.md — Wave 3: Frozen controlled demo reports and allowlisted offline loader
+- [x] 05-05-PLAN.md — Wave 4: Protected live report API, public demo API and complete backend verification
 
 ### Phase 6: RAG & Gemini summary
 **Goal**: Bounded LangChain evidence assembly plus ephemeral Chroma retrieval feed a cited Gemini impact
@@ -196,7 +196,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | 2. Imports, resolution, call graph | 9/9 | Complete | 2026-11-01 |
 | 3. FastAPI routes & impact paths | 4/4 | Complete | 2026-11-01 |
 | 4. PR ingestion & diff mapping | 5/5 | Complete | 2026-11-01 |
-| 5. Report JSON & evaluation | 0/TBD | Not started | - |
+| 5. Report JSON & evaluation | 5/5 | Complete | 2026-11-01 |
 | 6. RAG & Gemini summary | 0/TBD | Not started | - |
 | 7. Frontend | 0/TBD | Not started | - |
 | 8. Deployment, limits, caching | 0/TBD | Not started | - |

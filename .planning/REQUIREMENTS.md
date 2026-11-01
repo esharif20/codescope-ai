@@ -39,7 +39,7 @@ Must-priority stories from ARCHITECTURE.md. Each maps to exactly one roadmap pha
 
 ### Demo Access
 
-- [ ] **US-11**: User can view precomputed demo reports without signing in
+- [x] **US-11**: User can view precomputed demo reports without signing in
 
 ## v2 Requirements
 
@@ -80,7 +80,7 @@ Explicitly excluded by ARCHITECTURE.md's MVP scope.
 | US-01 | Phase 4 | Complete |
 | US-09 | Phase 4 | Complete |
 | US-12 | Phase 4 | Complete |
-| US-11 | Phase 5 | Pending |
+| US-11 | Phase 5 | Complete |
 | US-05 | Phase 6 | Pending |
 | US-08 | Phase 7 | Pending |
 | US-13 | Phase 8 | Pending |
@@ -92,4 +92,4 @@ Explicitly excluded by ARCHITECTURE.md's MVP scope.
 
 ---
 *Requirements defined: 2026-11-01*
-*Last updated: 2026-11-01 after Phase 4 completion and source-opening confirmation*
+*Last updated: 2026-11-01 after Phase 5 completion and independent verification*

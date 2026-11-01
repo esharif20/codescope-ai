@@ -121,9 +121,9 @@ Epic story: US-11 · GSD Phase 5 · Epic issue: https://github.com/esharif20/cod
 
 | ID | Title | Story | GSD Phase | Status | Acceptance criteria | Issue |
 | --- | --- | --- | --- | --- | --- | --- |
-| CS-050 | Report schema | US-11 | 5 | **TODO** | See epic for full context | tracked in epic #11 |
-| CS-051 | Evaluation harness on labelled fixtures | US-11 | 5 | **TODO** | See epic for full context | tracked in epic #11 |
-| CS-052 | Precomputed demo reports | US-11 | 5 | **TODO** | See epic for full context | tracked in epic #11 |
+| CS-050 | Report schema | US-11 | 5 | **DONE** | See epic for full context | tracked in epic #11 |
+| CS-051 | Evaluation harness on labelled fixtures | US-11 | 5 | **DONE** | See epic for full context | tracked in epic #11 |
+| CS-052 | Precomputed demo reports | US-11 | 5 | **DONE** | See epic for full context | tracked in epic #11 |
 
 ---
 
