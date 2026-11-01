@@ -42,7 +42,7 @@ Every user story US-01…US-13 must map to an owning ticket so nothing silently 
 | --- | --- | --- | --- | --- | --- | --- |
 | CS-001 | Repo + folder scaffold | — | — | **DONE** | Repository and backend/frontend/fixtures/infra/docs folders created | (none, already done pre-GSD) |
 | CS-002 | Core docs + .gitignore | — | — | **DONE** | ARCHITECTURE.md, AGENTS.md, README.md, .gitignore committed | (none, already done pre-GSD) |
-| CS-003 | GitHub Actions CI | — | — | **IN PROGRESS** | CI runs backend pytest and frontend Vitest on push | (none — workflow authored at `.github/workflows/backend-ci.yml`, YAML-validated locally; backend half only — frontend Vitest doesn't exist until Stage 7; cannot confirm an actual green run until this branch is pushed, which is outside the current "no pushes without approval" agreement) |
+| CS-003 | GitHub Actions CI | — | — | **IN PROGRESS** | CI runs backend pytest and frontend Vitest on push | (none — backend half **confirmed green on GitHub**: https://github.com/esharif20/codescope-ai/actions/runs/41312936528 (checkout, uv install, `ruff check`, `pytest -q` all passed on push to `feat/stage-1-python-symbols`); frontend Vitest half still TODO — doesn't exist until Stage 7, so CS-003 stays IN PROGRESS rather than DONE until then) |
 
 ---
 
