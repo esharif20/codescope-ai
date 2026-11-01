@@ -2,12 +2,7 @@
 
 from __future__ import annotations
 
-from app.analysis.call_graph import (
-    build_call_graph,
-    callees_of,
-    callers_of,
-    reverse_reachable_from,
-)
+from app.analysis.call_graph import build_call_graph
 from app.analysis.models import ResolutionStatus, ResolvedCall, Symbol, SymbolKind, UnresolvedCall
 
 
