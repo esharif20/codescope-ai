@@ -66,6 +66,10 @@ def _catalog() -> _Catalog:
     catalog = _Catalog.model_validate_json(raw)
     if raw != canonical_json_bytes(catalog) or [e.id for e in catalog.entries] != list(_DEMO_FILES):
         raise ValueError("invalid catalog")
+    if any(
+        (entry.title, entry.description) != _DESCRIPTIONS[entry.id] for entry in catalog.entries
+    ):
+        raise ValueError("unreviewed catalog metadata")
     return catalog
 
 
